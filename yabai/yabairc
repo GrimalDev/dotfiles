@@ -51,7 +51,7 @@ yabai -m config window_border              on           \
                 layout                     bsp
 
 # Exclude problematic apps from being managed:
-yabai -m rule --add app="^(LuLu|Vimac|Calculator|Software Update|Dictionary|VLC|System Preferences|System Settings|zoom.us|Photo Booth|Archive Utility|Python|LibreOffice|App Store|Steam|Raycast|Activity Monitor|1Password)$" manage=off
+yabai -m rule --add app="^(LuLu|Vimac|Calculator|Software Update|Dictionary|VLC|System Preferences|System Settings|zoom.us|Photo Booth|Archive Utility|Python|LibreOffice|App Store|Steam|Raycast|Activity Monitor|1Password|Parallels Desktop)$" manage=off
 yabai -m rule --add label="Finder" app="^Finder$" title="(Co(py|nnect)|Move|Info|Pref)" manage=off
 yabai -m rule --add label="Arc" app="^Arc$" title="^(General|(Tab|Password|Website|Extension)s|AutoFill|Se(arch|curity)|Privacy|Advance)$" manage=off
 yabai -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
@@ -73,7 +73,7 @@ function setup_space {
 }
 
 setup_space 1 landing
-setup_space 2 notion 
+setup_space 2 notion
 setup_space 3 arc
 setup_space 4 dev
 setup_space 5 stats
@@ -86,34 +86,49 @@ setup_space 9 discord
 # Strat apps
 function start_app {
   local app="$1"
-  app_id=$(osascript -e "id of app \"$app\"")
+  local title="$2"
+  local options="$3"
+  local mode="$4"
 
-  # if app is note running, start it
-  if [ -z "$app_id" ]; then
-    open -a "$app"
+  local title_search=""
+  if [ -n "$title" ]; then
+      title_search=" | select(.title == \"$title\")"
+  fi
+# if app with title of $2 is not running, start it
+  local is_running=$(yabai -m query --windows | jq -r '.[] | select(.app == "'"$app"'")'"$title_search")
+
+  if [ -z "$is_running" ]; then
+# If cli mode param provided (3rd param to cli string)
+    if [ "$mode" = "cli" ]; then
+      echo "Starting $app with cli mode"
+        /bin/bash -c "$app $options &"
+    else
+      echo "starting $app"
+      open -a "$app"
+    fi
   fi
 }
 
 # move some apps automatically to specific spaces
 yabai -m rule --add app="^Notion$" space=notion
 yabai -m rule --add app="^Arc$" space=arc
-yabai -m rule --add app="^kitty$" title="^(?!btop)" space=dev
+yabai -m rule --add app="^kitty$" title="^dev$" space=dev
 yabai -m rule --add app="^kitty$" title="^btop$" space=stats
 yabai -m rule --add app="^Music$" space=music
 yabai -m rule --add app="^Discord$" space=discord
 
+# Ranger rules
+yabai -m rule --add app="^kitty$" title="^ranger$" manage=off
+
+# rofi display rules
+yabai -m rule --add app="^rofi$" manage=off
+
 start_app "Notion"
-atart_app "Arc"
-start_app "kitty -e tmux new -s dev"
+start_app "Arc"
+start_app "kitty" "dev" "--title dev -e tmux new -s dev $(which fish)" "cli"
+start_app "kitty" "btop" "--title btop -e btop" "cli"
 start_app "Music"
 start_app "Discord"
 
-if [ -z "$(yabai -m query --windows --space 5 | grep btop" ]; then
-  # launch kitty with btop and title it
-  kitty --title btop -e btop
-fi
-
-brew services stop ybaai
-brew services start yabai
 
 echo "yabai configuration loaded.."

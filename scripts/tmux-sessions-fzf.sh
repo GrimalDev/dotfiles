@@ -3,8 +3,7 @@
 # if no sessions diplay a message
 if [ -z "$(tmux list-session)" ] ; then
   # ask to create a new session
-  echo "No sessions found. Do you want to create a new session? (name,n)"
-  read -r create_new_session
+  create_new_session=$(echo -e "y\nn" | choose --prompt="No sessions found. Create a new session? ")
 
   ["$create_new_session" == "n"] && exit 1
 
@@ -14,7 +13,8 @@ if [ -z "$(tmux list-session)" ] ; then
   exit 0
 fi
 
-selected_session=$(tmux list-session -F '#S' | fzf --reverse --height 40% --border --prompt="Select a session: ")
+# selected_session=$(tmux list-session -F '#S' | fzf --reverse --height 40% --border --prompt="Select a session: ")
+selected_session=$(tmux list-session -F '#S' | choose)
 
 # if no session selected, exit
 [ -z "$selected_session" ] && exit 1

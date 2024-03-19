@@ -1,0 +1,131 @@
+# Common recent settings file for Wireshark 4.0.7.
+#
+# This file is regenerated each time Wireshark is quit
+# and when changing configuration profile.
+# So be careful, if you want to make manual changes here.
+
+######## Recent capture files (latest last), cannot be altered through command line ########
+
+recent.capture_file: /Users/thehiddengeek/Documents/Snif/perduCom_snif.pcapng
+recent.capture_file: /Users/thehiddengeek/Downloads/packetcapture(1).cap
+recent.capture_file: /Users/thehiddengeek/Downloads/TELNET_mdp_find.pcap
+recent.capture_file: /Users/thehiddengeek/Downloads/packetcapture-2.cap
+recent.capture_file: /Users/thehiddengeek/Downloads/packetcapture-3.cap
+recent.capture_file: /Users/thehiddengeek/Downloads/packetcapture-4.cap
+recent.capture_file: /Users/thehiddengeek/Downloads/packetcapture-5.cap
+recent.capture_file: /Users/thehiddengeek/Downloads/packetcapture-6.cap
+recent.capture_file: /Users/thehiddengeek/Downloads/packetcapture.cap
+recent.capture_file: /Users/thehiddengeek/Documents/Snif/baptiste_snif.pcapng
+
+######## Recent capture filters (latest last), cannot be altered through command line ########
+
+recent.capture_filter: host 192.168.1.25
+recent.capture_filter: port 8080
+recent.capture_filter.en0: host 192.168.1.25
+recent.capture_filter.en0: port 8080
+
+######## Recent display filters (latest last), cannot be altered through command line ########
+
+recent.display_filter: ip.src_host ==  10.167.129.118
+recent.display_filter: ip
+recent.display_filter: http and !(tcp.stream eq 8)
+recent.display_filter: tcp.stream eq 8
+recent.display_filter: http
+recent.display_filter: udp.stream eq 27
+recent.display_filter: ip.src_host == 2a01
+recent.display_filter: ip.src_host == 2a01:cb10:3:b00:3b:94bf:a3da:d132
+recent.display_filter: ip.src_host
+recent.display_filter: tcp.stream eq 1
+
+# Main window geometry.
+# Decimal numbers.
+gui.geometry_main_x: 332
+gui.geometry_main_y: 144
+gui.geometry_main_width: 960
+gui.geometry_main_height: 768
+
+# Main window maximized.
+# TRUE or FALSE (case-insensitive).
+gui.geometry_main_maximized: FALSE
+
+# Leftalign Action Buttons.
+# TRUE or FALSE (case-insensitive).
+gui.geometry_leftalign_actions: FALSE
+
+# Statusbar left pane size.
+# Decimal number.
+gui.geometry_status_pane: 250
+
+# Statusbar middle pane size.
+# Decimal number.
+gui.geometry_status_pane_right: 250
+
+# Last used Configuration Profile.
+gui.last_used_profile: Default
+
+# WLAN statistics upper pane size.
+# Decimal number.
+gui.geometry_status_wlan_stats_pane: 200
+
+# Warn if running with elevated permissions (e.g. as root).
+# TRUE or FALSE (case-insensitive).
+privs.warn_if_elevated: TRUE
+
+# Warn if Wireshark is unable to capture.
+# TRUE or FALSE (case-insensitive).
+sys.warn_if_no_capture: FALSE
+
+# Find packet search in.
+# One of: PACKET_LIST, PACKET_DETAILS, PACKET_BYTES
+gui.search_in: PACKET_LIST
+
+# Find packet character set.
+# One of: NARROW_AND_WIDE, NARROW, WIDE
+gui.search_char_set: NARROW_AND_WIDE
+
+# Find packet case sensitive search.
+# TRUE or FALSE (case-insensitive).
+gui.search_case_sensitive: FALSE
+
+# Find packet search type.
+# One of: DISPLAY_FILTER, HEX_VALUE, STRING, REGEX
+gui.search_type: STRING
+
+# Geometry and maximized state of PacketDialog window.
+# Decimal integers.
+gui.geom.PacketDialog.x: 0
+gui.geom.PacketDialog.y: 0
+gui.geom.PacketDialog.width: 1440
+gui.geom.PacketDialog.height: 900
+# TRUE or FALSE (case-insensitive).
+gui.geom.PacketDialog.maximized: TRUE
+
+# Geometry and maximized state of ColoringRulesDialog window.
+# Decimal integers.
+gui.geom.ColoringRulesDialog.x: 240
+gui.geom.ColoringRulesDialog.y: 110
+gui.geom.ColoringRulesDialog.width: 960
+gui.geom.ColoringRulesDialog.height: 677
+# TRUE or FALSE (case-insensitive).
+gui.geom.ColoringRulesDialog.maximized: FALSE
+
+# Geometry and maximized state of FollowStreamDialog window.
+# Decimal integers.
+gui.geom.FollowStreamDialog.x: 0
+gui.geom.FollowStreamDialog.y: 0
+gui.geom.FollowStreamDialog.width: 1440
+gui.geom.FollowStreamDialog.height: 900
+# TRUE or FALSE (case-insensitive).
+gui.geom.FollowStreamDialog.maximized: TRUE
+
+# Custom colors.
+# List of custom colors selected in Qt color picker.
+gui.custom_colors: 
+	"ffffffff", "ffffffff",
+	"ffffffff", "ffffffff",
+	"ffffffff", "ffffffff",
+	"ffffffff", "ffffffff",
+	"ffffffff", "ffffffff",
+	"ffffffff", "ffffffff",
+	"ffffffff", "ffffffff",
+	"ffffffff", "ffffffff"

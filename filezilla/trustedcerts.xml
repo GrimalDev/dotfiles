@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<FileZilla3 version="3.55.1" platform="mac">
+	<InsecureHosts>
+		<Host Port="21">ftp.cluster031.hosting.ovh.net</Host>
+		<Host Port="21">GAME-FR-50.MTXSERV.COM</Host>
+		<Host Port="21">62.210.62.205</Host>
+		<Host Port="2121">192.168.0.124</Host>
+		<Host Port="21">10.242.20.100</Host>
+		<Host Port="2121">192.168.0.110</Host>
+	</InsecureHosts>
+</FileZilla3>

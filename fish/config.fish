@@ -44,6 +44,9 @@ set -gx PATH $BUN_INSTALL/bin $PATH
 # Update PATH for ImageMagick
 set -gx PATH /usr/local/opt/imagemagick@7/bin $PATH
 
+# Mac ports
+set -gx PATH /opt/local/bin:/opt/local/sbin:$PATH
+
 set -gx EDITOR "nvim"
 
 # Custom aliases
@@ -71,4 +74,3 @@ bind -M insert \ee "nvim"
 bind -M insert \ec "nvim ~/.config/fish/config.fish"
 bind -M insert \er "ranger"
 bind -M insert \el __fish_list_current_token # my preferred listing
-bind -M insert \ew "/bin/bash ~/.config/scripts/tmux-sessions-fzf.sh"
