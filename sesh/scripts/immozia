@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+tmux_session="Immozia\ 🏡"
+
+# tmux new-window -c '#{pane_current_path}' -t "${tmux_session}:1" "nvim"
+tmux send-keys -t "${tmux_session}:1" "nvim" enter
+tmux new-window -c '#{pane_current_path}' -t "${tmux_session}:2"
+tmux new-window -c '#{pane_current_path}' -t "${tmux_session}:3" "ssh -t immozia 'cd /home/immo/www; exec bash -l'"

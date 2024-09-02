@@ -1,0 +1,168 @@
+#----------- FUNCTIONS -------------
+
+# Strat apps
+function start_app {
+  local app="$1"
+  local title="$2"
+  local options="$3"
+  local mode="$4"
+
+  local title_search=""
+  if [ -n "$title" ]; then
+      title_search=" | select(.title == \"$title\")"
+  fi
+# if app with title of $2 is not running, start it
+  local is_running=$(yabai -m query --windows | jq -r '.[] | select(.app == "'"$app"'")'"$title_search")
+
+  if [ -z "$is_running" ]; then
+# If cli mode param provided (3rd param to cli string)
+    if [ "$mode" = "cli" ]; then
+      echo "Starting $app with cli mode"
+        /bin/bash -c "$app $options &"
+    else
+      echo "starting $app"
+      open -a "$app"
+    fi
+  fi
+}
+
+function restart_app {
+  local app="$1"
+
+  if [ -n "$(pgrep -f $app)" ]; then
+    pkill -f "$app"
+  fi
+
+  open -a "$app"
+}
+
+# Space label
+function setup_space {
+  local idx="$1"
+  local name="$2"
+  local space=
+  echo "setup space $idx : $name"
+
+  space=$(yabai -m query --spaces --space "$idx")
+  if [ -z "$space" ]; then
+    yabai -m space --create
+  fi
+
+  yabai -m space "$idx" --label "$name"
+}
+
+#----------- CONFIG -------------
+
+yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+sudo yabai --load-sa
+
+# Unload the macOS WindowManager process
+launchctl unload -F /System/Library/LaunchAgents/com.apple.WindowManager.plist > /dev/null 2>&1 &
+
+# Add border to focused windows
+borders style=round                 \
+        hdpi=1                      \
+        width=3.0                   \
+	      active_color=0xff81a1c1     \
+	      inactive_color=0xfe2e3440   \
+        &
+
+#sketchybar
+yabai -m config external_bar all:$(sketchybar --query bar | jq .height):0
+yabai -m signal --add event=window_created action="sketchybar -m --trigger window_change &> /dev/null"
+yabai -m signal --add event=window_destroyed action="sketchybar -m --trigger window_change &> /dev/null"
+
+yabai -m signal --add event=window_focused action="sketchybar --trigger window_focus"
+# yabai -m signal --add event=display_added action="sleep 2 && $HOME/.config/yabai/create_spaces.sh"
+# yabai -m signal --add event=display_removed action="sleep 1 && $HOME/.config/yabai/create_spaces.sh"
+yabai -m signal --add event=window_created action="sketchybar --trigger windows_on_spaces"
+yabai -m signal --add event=window_destroyed action="sketchybar --trigger windows_on_spaces"
+
+# focus window after active space changes
+yabai -m signal --add event=space_changed action="yabai -m window --focus \$(yabai -m query --windows --space | jq .[0].id)"
+# focus window after active display changes
+yabai -m signal --add event=display_changed action="yabai -m window --focus \$(yabai -m query --windows --space | jq .[0].id)"
+# focus window after window destroyed
+yabai -m signal --add event=window_destroyed action="yabai -m window --focus \$(yabai -m query --windows --space | jq .[0].id)"
+
+# $HOME/.config/yabai/create_spaces.sh
+
+yabai -m config window_border              on           \
+                mouse_follows_focus        on           \
+                focus_follows_mouse        off          \
+                window_zoom_persist        off          \
+                window_placement           second_child \
+                window_topmost             off          \
+                window_shadow              float        \
+                window_opacity             on           \
+                window_opacity_duration    0.15         \
+                active_window_opacity      1.0          \
+                normal_window_opacity      0.95         \
+                window_border_width        2            \
+                window_border_hidpi        off          \
+                window_border_radius       11           \
+                window_animation_duration  0.22         \
+                active_window_border_color 0xffe1e3e4   \
+                normal_window_border_color 0xff2a2f38   \
+                insert_feedback_color      0xff9dd274   \
+                split_ratio                0.50         \
+                auto_balance               off          \
+                mouse_modifier             fn           \
+                mouse_action1              move         \
+                mouse_action2              resize       \
+                mouse_drop_action          swap         \
+                                                        \
+                top_padding                5            \
+                bottom_padding             2            \
+                left_padding               5            \
+                right_padding              5            \
+                window_gap                 8            \
+                                                        \
+                layout                     bsp
+
+# Exclude problematic apps from being managed:
+yabai -m rule --add app="^(Finder|Shottr|Calculator|Software Update|Dictionary|VLC|System Preferences|System Settings|Python|Raycast|1Password|Parallels Desktop|Autodesk Fusion 360)$" manage=off
+yabai -m rule --add label="Arc" app="^Arc$" title="^(General|(Tab|Password|Website|Extension)s|AutoFill|Se(arch|curity)|Privacy|Advance)$" manage=off
+yabai -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
+yabai -m rule --add label="Select file to save to" app="^Inkscape$" title="Select file to save to" manage=off
+
+setup_space 1 landing
+setup_space 2 notion
+setup_space 3 arc
+setup_space 4 dev
+setup_space 5 stats
+setup_space 6 music
+setup_space 7 other2
+setup_space 8 other3
+setup_space 9 discord
+# setup_space 10 external_display
+
+# move some apps automatically to specific spaces
+yabai -m rule --add app="^Notion$" space=notion
+yabai -m rule --add app="^Arc$" space=arc
+yabai -m rule --add app="^kitty$" title="^dev$" space=dev
+yabai -m rule --add app="^kitty$" title="^btop$" space=stats
+yabai -m rule --add app="^Music$" space=music
+yabai -m rule --add app="^Discord$" space=discord
+
+
+# Ranger rules
+yabai -m rule --add app="^kitty$" title="^ranger$" manage=off sticky=on grid=6:6:1:1:4:4
+# Tabby rules
+yabai -m rule --add app="^Tabby$" manage=off sticky=on grid=7:7:1:1:5:5
+# rofi display rules
+yabai -m rule --add app="^rofi$" manage=off
+# ChatGPT window
+yabai -m rule --add app="^ChatGPT$" manage=off sticky=on grid=6:6:1:1:4:4
+
+start_app "Notion"
+start_app "Arc"
+start_app "kitty" "dev" "--title dev -e sesh connect \"Home 💻\"" "cli"
+start_app "kitty" "btop" "--title btop -e btop" "cli"
+start_app "Music"
+start_app "Discord"
+
+brew services restart sketchybar
+restart_app "ChatGPT"
+
+echo "yabai configuration loaded.."

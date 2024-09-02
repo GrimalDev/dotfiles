@@ -1,0 +1,22 @@
+[default_session]
+startup_command = "nvim"
+
+[[session]]
+name = "Home 💻"
+path = "~"
+startup_command = "clear"
+
+[[session]]
+name = "Immozia 🏡"
+path = "~/Documents/work/oxianet.nosync/immozia/"
+startup_script = "~/.config/sesh/scripts/immozia"
+
+[[session]]
+name = "SRVWEBSTR01 🌐"
+path = "~/Documents/servers/srvwebstr01/"
+startup_command = "ssh srvwebstr01 && clear"
+
+[[session]]
+name = "PI 🌐"
+path = "~/Documents/servers/pi/"
+startup_command = "ssh pi && clear"
