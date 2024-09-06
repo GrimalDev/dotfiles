@@ -12,6 +12,14 @@ alias ll='exa -alhg --color=always --group-directories-first'  # long format
 alias lt='exa -aT --color=always --group-directories-first' # tree listing
 alias cat='bat'
 alias icat='kitten icat'
+
+function mfzf
+  set current_dir (pwd)
+  cd /Users/grimaldev/Documents/projects/scripts/man-fuzzy/package_docs
+  rg --color=always '' * | fzf --ansi --preview 'echo {} | cut -d ":" -f 1 | xargs -I{} sh -c "head -n 20 {}"' --preview-window=up:40%:wrap
+  cd $current_dir
+end
+
 # alias ssh="kitty +kitten ssh"
 
 fish_vi_key_bindings
@@ -110,12 +118,12 @@ set -gx PATH /opt/local/bin:/opt/local/sbin:$PATH
 
 set -gx EDITOR "nvim"
 
-set -gx DOTFILES ".config"
-set -gx DOTFILES_MIRROR ".dotfiles"
+set -gx DOTFILES "$HOME/.config"
+set -gx DOTFILES_MIRROR "$HOME/.dotfiles"
 
 # Custom aliases
 alias uninstall="uninstall-cli.sh"
-alias dots="git --git-dir=$HOME/$DOTFILES_MIRROR --work-tree=$HOME/$DOTFILES"
+alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
 
 # Set NODE_PATH
 set -gx NODE_PATH /usr/local/Lib/node_modules
@@ -123,6 +131,12 @@ set -gx NODE_PATH /usr/local/Lib/node_modules
 # Set JAVA_HOME
 set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home
 set -gx PATH $JAVA_HOME/bin $PATH
+
+if test ! -d ~/ATAC_MAIN_DIR
+  mkdir ~/ATAC_MAIN_DIR
+end
+set -gx ATAC_MAIN_DIR ~/ATAC_MAIN_DIR
+set -gx ATAC_KEY_BINDINGS $DOTFILES/atac/custom_keybindings.toml
 
 alias rr='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
 
