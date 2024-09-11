@@ -1,7 +1,11 @@
 # include ~/.config/kitty/themes/catppuccin/mocha.conf
 include ~/.config/kitty/themes/everforest/everforest_dark_hard.conf
-# font_family             Source Code Pro iCursive S12
+
+font_family             Source Code Pro iCursive S12
 font_size               11
+bold_font               Source Code Pro iCursive S12 Bold
+italic_font             Source Code Pro iCursive S12 Italic
+bold_italic_font        auto
 mouse_hide_wait         0.1
 cursor_shape            block
 url_color               #0087bd
@@ -32,11 +36,3 @@ map ctrl+shift+h send_text All \X1b[72;5u
 map ctrl+shift+l send_text All \X1b[76;5u
 
 map cmd+opt+s noop
-
-
-# BEGIN_KITTY_FONTS
-font_family      family="Jetbrainsmono Nerd Font"
-bold_font        auto
-italic_font      auto
-bold_italic_font auto
-# END_KITTY_FONTS
