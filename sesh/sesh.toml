@@ -9,7 +9,7 @@ startup_command = "clear"
 [[session]]
 name = "Immozia 🏡"
 path = "~/Documents/work/oxianet.nosync/immozia/"
-startup_script = "~/.config/sesh/scripts/immozia"
+startup_command = "bash $DOTFILES/sesh/scripts/immozia"
 
 [[session]]
 name = "SRVWEBSTR01 🌐"
