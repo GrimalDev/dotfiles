@@ -95,6 +95,12 @@ function toogle_app
   end
 end
 
+function jqf
+  set -l search_string $argv[1]
+  set -l file $argv[2]
+  jq 'paths | map(tostring) | join(".") | select(contains("'$search_string'"))' $file
+end
+
 set -gx TERM xterm-256color
 
 # Set the PATH
@@ -119,18 +125,32 @@ set -gx PATH /opt/local/bin:/opt/local/sbin:$PATH
 set -gx EDITOR "nvim"
 
 set -gx DOTFILES "$HOME/.config"
-set -gx DOTFILES_MIRROR "$HOME/.dotfiles"
+if test -d $HOME/.dotfiles
+  set -gx DOTFILES_MIRROR "$HOME/.dotfiles"
+end
+set nvimSessionsPath "$HOME/sessions/"
+if test ! -d $nvimSessionsPath
+  mkdir -p $nvimSessionsPath
+  set -gx NVIM_SESSIONS $nvimSessionsPath
+else
+  set -gx NVIM_SESSIONS $nvimSessionsPath
+end
 
 # Custom aliases
 alias uninstall="uninstall-cli.sh"
 alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
 
 # Set NODE_PATH
-set -gx NODE_PATH /usr/local/Lib/node_modules
+if test -d /usr/local/Lib/node_modules
+  set -gx NODE_PATH /usr/local/Lib/node_modules
+end
 
 # Set JAVA_HOME
-set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home
-set -gx PATH $JAVA_HOME/bin $PATH
+if test -d /Library/Java
+  set newest_jdk (find /library/java/javavirtualmachines/ -d -name 'jdk-*.jdk' | sort -V | tail -n 1)
+  set -gx JAVA_HOME $newest_jdk/Contents/Home
+  set -gx PATH $JAVA_HOME/bin $PATH
+end
 
 if test ! -d ~/ATAC_MAIN_DIR
   mkdir ~/ATAC_MAIN_DIR
