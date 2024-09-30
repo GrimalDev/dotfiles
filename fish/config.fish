@@ -1,6 +1,7 @@
 zoxide init fish | source
 starship init fish | source
 
+set -e fish_user_paths
 fish_add_path /opt/homebrew/opt/qt@5/bin
 set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
 
@@ -44,8 +45,6 @@ function brew
 end
 
 function __list_run_files
-  echo " "
-
   if test ! -d .run
     echo "No .run directory"
     return
@@ -56,12 +55,12 @@ function __list_run_files
   end
   set file_to_run (fd '^*.sh$' -t f -d 1 .run | fzf)
   if test -n "$file_to_run"
-    bash $file_to_run
+    # set file_to_run (string replace -r "(\r\n|\n|\r)" "" $file_to_run)
+    commandline -r "bash $file_to_run"
+    commandline -f execute
   else
     echo "No file selected"
   end
-
-  echo -n "Press enter key to continue..."
 end
 
 
@@ -123,6 +122,8 @@ set -gx PATH /usr/local/opt/imagemagick@7/bin $PATH
 set -gx PATH /opt/local/bin:/opt/local/sbin:$PATH
 
 set -gx EDITOR "nvim"
+
+set -gx XDEBUG_SESSION 1
 
 set -gx DOTFILES "$HOME/.config"
 if test -d $HOME/.dotfiles
