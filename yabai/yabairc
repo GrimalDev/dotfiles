@@ -68,6 +68,7 @@ borders style=round                 \
         &
 
 #sketchybar
+# yabai -m config external_bar all:$(math $(sketchybar --query bar | jq .height) + 2):0
 yabai -m config external_bar all:$(sketchybar --query bar | jq .height):0
 yabai -m signal --add event=window_created action="sketchybar -m --trigger window_change &> /dev/null"
 yabai -m signal --add event=window_destroyed action="sketchybar -m --trigger window_change &> /dev/null"
