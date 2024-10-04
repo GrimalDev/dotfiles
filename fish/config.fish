@@ -3,19 +3,11 @@ starship init fish | source
 
 set -e fish_user_paths
 fish_add_path /opt/homebrew/opt/qt@5/bin
+fish_add_path /opt/homebrew/bin
 set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
 
-alias immozia="cd $HOME/Desktop/oxianet/immozia"
-
-alias tree='exa --tree'
-alias ls='exa -a --color=always --group-directories-first'
-alias ll='exa -alhg --color=always --group-directories-first'  # long format
-alias lt='exa -aT --color=always --group-directories-first' # tree listing
-alias cat='bat'
-alias icat='kitten icat'
-
 function mfzf
-  set current_dir (pwd)
+  set -l current_dir (pwd)
   cd /Users/grimaldev/Documents/projects/scripts/man-fuzzy/package_docs
   rg --color=always '' * | fzf --ansi --preview 'echo {} | cut -d ":" -f 1 | xargs -I{} sh -c "head -n 20 {}"' --preview-window=up:40%:wrap
   cd $current_dir
@@ -36,7 +28,7 @@ end
 function brew
   # if there are no params, list all installed packages and install on selection else just forward the params to brew
   if test "$argv" = ""
-    set packet $(bash -c "(curl -s https://formulae.brew.sh/api/formula.json && curl -s https://formulae.brew.sh/api/cask.json) | jq -r '.[].full_name, .[].full_token | select(.!=null)'" | fzf)
+    set -l packet $(bash -c "(curl -s https://formulae.brew.sh/api/formula.json && curl -s https://formulae.brew.sh/api/cask.json) | jq -r '.[].full_name, .[].full_token | select(.!=null)'" | fzf)
     command brew install $packet
     set -e packages
   else
@@ -53,7 +45,7 @@ function __list_run_files
     echo "no executable files found in .run"
     return
   end
-  set file_to_run (fd '^*.sh$' -t f -d 1 .run | fzf)
+  set -l file_to_run (fd '^*.sh$' -t f -d 1 .run | fzf)
   if test -n "$file_to_run"
     # set file_to_run (string replace -r "(\r\n|\n|\r)" "" $file_to_run)
     commandline -r "bash $file_to_run"
@@ -63,18 +55,52 @@ function __list_run_files
   end
 end
 
+function genSeshConfig
+  set -l genFile $DOTFILES/sesh/sesh-autogen.toml
+
+  echo "" > $genFile
+
+  set -l seshTemplate "
+\n
+[[session]]\n
+name = 'NAME ⚙️'\n
+path = 'CONFIG'\n
+\n
+  "
+
+  set -l configNames (fd -p -t d -d 1 . $HOME/.config/)
+
+  #replace NAME and CONFIG placeholders
+  for config in $configNames
+    set -l configName (string replace -r "$DOTFILES/" "" $config)
+    set -l configName (string replace -r "/" "" $configName)
+
+    set -l configExists (rg -q $config $DOTFILES/sesh/sesh.toml)
+    if test -n "$configExists"
+      echo "$configName already exists in sesh.toml"
+      continue
+    end
+
+    set -l tempTemplate $seshTemplate
+    set -l configPath $DOTFILES/$configName
+
+    set -l tempTemplate (string replace -r "NAME" $configName $tempTemplate)
+    set -l tempTemplate (string replace -r "CONFIG" $configPath $tempTemplate)
+    printf "$tempTemplate" >> $genFile
+  end
+end
 
 # Start, hide, show apps
 function toogle_app
-  set app $argv[1]
-  set title $argv[2]
-  set options $argv[3]
-  set mode $argv[4]
-  set title_search ""
+  set -l app $argv[1]
+  set -l title $argv[2]
+  set -l options $argv[3]
+  set -l mode $argv[4]
+  set -l title_search ""
   if test -n "$title"
-    set title_search " | select(.title == \"$title\")"
+    set -l title_search " | select(.title == \"$title\")"
   end
-  set is_running (yabai -m query --windows | jq -r '.[] | select(.app == "'"$app"'")'"$title_search")
+  set -l is_running (yabai -m query --windows | jq -r '.[] | select(.app == "'"$app"'")'"$title_search")
   if test -z "$is_running"
     if test "$mode" = "cli"
       echo "Starting $app with cli mode"
@@ -84,8 +110,8 @@ function toogle_app
       open -a "$app"
     end
   else
-    set app_id (echo $is_running | jq -r '.id')
-    set is_minimized (echo $is_running | jq -r '.["is-minimized"]')
+    set -l app_id (echo $is_running | jq -r '.id')
+    set -l is_minimized (echo $is_running | jq -r '.["is-minimized"]')
     if test "$is_minimized" = "false"
       yabai -m window "$app_id" --minimize
     else
@@ -98,6 +124,10 @@ function jqf
   set -l search_string $argv[1]
   set -l file $argv[2]
   jq 'paths | map(tostring) | join(".") | select(contains("'$search_string'"))' $file
+end
+
+function share
+    curl -F "file=@$argv" https://0x0.st | wl-copy
 end
 
 set -gx TERM xterm-256color
@@ -121,6 +151,8 @@ set -gx PATH /usr/local/opt/imagemagick@7/bin $PATH
 # Mac ports
 set -gx PATH /opt/local/bin:/opt/local/sbin:$PATH
 
+set -gx PATH "/opt/homebrew/opt/mysql@8.4/bin:$PATH"
+
 set -gx EDITOR "nvim"
 
 set -gx XDEBUG_SESSION 1
@@ -136,10 +168,6 @@ if test ! -d $nvimSessionsPath
 else
   set -gx NVIM_SESSIONS $nvimSessionsPath
 end
-
-# Custom aliases
-alias uninstall="uninstall-cli.sh"
-alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
 
 # Set NODE_PATH
 if test -d /usr/local/Lib/node_modules
@@ -177,3 +205,13 @@ bind -M insert \el __fish_list_current_token # my preferred listing
 bind -M insert \er __list_run_files
 bind -M insert \ed "lazydocker"
 
+alias immozia="cd $HOME/Desktop/oxianet/immozia"
+
+alias tree='exa --tree'
+alias ls='exa -a --color=always --group-directories-first'
+alias ll='exa -alhg --color=always --group-directories-first'  # long format
+alias lt='exa -aT --color=always --group-directories-first' # tree listing
+alias cat='bat'
+alias icat='kitten icat'
+alias uninstall="uninstall-cli.sh"
+alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"

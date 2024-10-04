@@ -20,3 +20,8 @@ startup_command = "ssh srvwebstr01 && clear"
 name = "PI 🌐"
 path = "~/Documents/servers/pi/"
 startup_command = "ssh pi && clear"
+
+[[session]]
+name = "Nvim ⚙️"
+path = "~/.config/nvim/lua"
+
