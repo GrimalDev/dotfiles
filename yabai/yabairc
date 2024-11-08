@@ -89,7 +89,7 @@ yabai -m signal --add event=window_destroyed action="yabai -m window --focus \$(
 # $HOME/.config/yabai/create_spaces.sh
 
 yabai -m config window_border              on           \
-                mouse_follows_focus        on           \
+                mouse_follows_focus        off          \
                 focus_follows_mouse        off          \
                 window_zoom_persist        off          \
                 window_placement           second_child \
@@ -122,7 +122,7 @@ yabai -m config window_border              on           \
                 layout                     bsp
 
 # Exclude problematic apps from being managed:
-yabai -m rule --add app="^(Finder|Shottr|Calculator|Software Update|Dictionary|VLC|System Preferences|System Settings|Python|Raycast|1Password|Parallels Desktop|Autodesk Fusion 360)$" manage=off
+yabai -m rule --add app="^(Finder|Shottr|Calculator|Software Update|Dictionary|VLC|System Preferences|System Settings|Python|Raycast|1Password|Parallels Desktop)$" manage=off
 yabai -m rule --add label="Arc" app="^Arc$" title="^(General|(Tab|Password|Website|Extension)s|AutoFill|Se(arch|curity)|Privacy|Advance)$" manage=off
 yabai -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
 yabai -m rule --add label="Select file to save to" app="^Inkscape$" title="Select file to save to" manage=off
