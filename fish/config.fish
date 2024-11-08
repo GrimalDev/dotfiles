@@ -4,6 +4,7 @@ starship init fish | source
 set -e fish_user_paths
 fish_add_path /opt/homebrew/opt/qt@5/bin
 fish_add_path /opt/homebrew/bin
+fish_add_path /opt/homebrew/Cellar/postgresql@17/17.0/bin
 set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
 
 function mfzf
@@ -130,7 +131,9 @@ function share
     curl -F "file=@$argv" https://0x0.st | wl-copy
 end
 
-set -gx TERM xterm-256color
+if test -z TMUX
+  set -gx TERM xterm-256color
+end
 
 # Set the PATH
 set -gx PATH $HOME/.pyenv/bin $PATH
@@ -156,6 +159,8 @@ set -gx PATH "/opt/homebrew/opt/mysql@8.4/bin:$PATH"
 set -gx EDITOR "nvim"
 
 set -gx XDEBUG_SESSION 1
+
+# set -gx DOCKER_DEFAULT_PLATFORM "linux/amd64"
 
 set -gx DOTFILES "$HOME/.config"
 if test -d $HOME/.dotfiles
@@ -183,6 +188,8 @@ end
 
 if test ! -d ~/ATAC_MAIN_DIR
   mkdir ~/ATAC_MAIN_DIR
+  touch ~/ATAC_MAIN_DIR/custom_keybindings.toml
+  touch ~/ATAC_MAIN_DIR/atac.toml
 end
 set -gx ATAC_MAIN_DIR ~/ATAC_MAIN_DIR
 set -gx ATAC_KEY_BINDINGS $DOTFILES/atac/custom_keybindings.toml
@@ -215,3 +222,7 @@ alias cat='bat'
 alias icat='kitten icat'
 alias uninstall="uninstall-cli.sh"
 alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
+
+
+# Added by LM Studio CLI (lms)
+set -gx PATH $PATH /Users/grimaldev/.cache/lm-studio/bin

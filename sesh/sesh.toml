@@ -25,3 +25,4 @@ startup_command = "ssh pi && clear"
 name = "Nvim ⚙️"
 path = "~/.config/nvim/lua"
 
+import = ["~/.config/sesh/sesh-autogen.toml"]

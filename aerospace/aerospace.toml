@@ -1,0 +1,99 @@
+
+# Place a copy of this config to ~/.aerospace.toml
+# After that, you can edit ~/.aerospace.toml to your liking
+
+# Start AeroSpace at login
+start-at-login = true
+
+# Start applications after AeroSpace startup
+after-startup-command = [
+    "open -a Notion",
+    "open -a Arc",
+    "open -a kitty --args --title dev -e sesh connect 'Home 💻'",
+    "open -a kitty --args --title btop -e btop",
+    "open -a Music",
+    "open -a Discord",
+    "open -a ChatGPT"
+]
+
+# Workspaces setup: You may want to adjust the space labels based on your needs
+# This is a placeholder; set labels and other properties in your application
+[workspaces]
+workspace-1 = { name = "landing" }
+workspace-2 = { name = "notion" }
+workspace-3 = { name = "arc" }
+workspace-4 = { name = "dev" }
+workspace-5 = { name = "stats" }
+workspace-6 = { name = "music" }
+workspace-7 = { name = "other2" }
+workspace-8 = { name = "other3" }
+workspace-9 = { name = "discord" }
+
+# Application rules for managing specific apps
+[app-rules]
+# Exclude problematic apps from being managed
+exclude-apps = [
+    "Finder",
+    "Shottr",
+    "Calculator",
+    "Software Update",
+    "Dictionary",
+    "VLC",
+    "System Preferences",
+    "System Settings",
+    "Python",
+    "Raycast",
+    "1Password",
+    "Parallels Desktop"
+]
+
+# Manage applications based on their titles
+manage-apps = [
+    { app = "Notion", space = "notion" },
+    { app = "Arc", space = "arc" },
+    { app = "kitty", title = "dev", space = "dev" },
+    { app = "kitty", title = "btop", space = "stats" },
+    { app = "Music", space = "music" },
+    { app = "Discord", space = "discord" },
+    { app = "kitty", title = "ranger", manage = "off", sticky = "on", grid = "6:6:1:1:4:4" },
+    { app = "Tabby", manage = "off", sticky = "on", grid = "7:7:1:1:5:5" },
+    { app = "rofi", manage = "off" },
+    { app = "ChatGPT", manage = "off", sticky = "on", grid = "6:6:1:1:4:4" }
+]
+
+# Normalizations
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+# Layouts
+accordion-padding = 30
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+# Gaps between windows
+[gaps]
+inner.horizontal = 0
+inner.vertical = 0
+outer.left = 0
+outer.bottom = 0
+outer.top = 0
+outer.right = 0
+
+# Key mapping
+[key-mapping]
+preset = 'qwerty'
+
+# Mouse follows focus when focused monitor changes
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+# Window management preferences
+automatically-unhide-macos-hidden-apps = false
+
+# Window border settings (adapt these values as needed)
+[window-settings]
+border-style = 'round'
+border-width = 3.0
+border-active-color = '0xff81a1c1'
+border-inactive-color = '0xfe2e3440'
+
+# Add any additional settings you may need
