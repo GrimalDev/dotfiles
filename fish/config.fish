@@ -5,7 +5,9 @@ set -e fish_user_paths
 fish_add_path /opt/homebrew/opt/qt@5/bin
 fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/Cellar/postgresql@17/17.0/bin
-set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
+if test -d /opt/homebrew
+  set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
+end
 
 function mfzf
   set -l current_dir (pwd)
@@ -13,8 +15,6 @@ function mfzf
   rg --color=always '' * | fzf --ansi --preview 'echo {} | cut -d ":" -f 1 | xargs -I{} sh -c "head -n 20 {}"' --preview-window=up:40%:wrap
   cd $current_dir
 end
-
-# alias ssh="kitty +kitten ssh"
 
 fish_vi_key_bindings
 
@@ -135,26 +135,28 @@ if test -z TMUX
   set -gx TERM xterm-256color
 end
 
-# Set the PATH
-set -gx PATH $HOME/.pyenv/bin $PATH
+fish_add_path $HOME/.pyenv/bin
 
 # Set the M2_HOME and update the PATH for Apache Maven
 set -gx M2_HOME $HOME/apache-maven-3.9.0
-set -gx PATH $M2_HOME/bin $PATH
+fish_add_path $M2_HOME/bin
 
 # Set BUN_INSTALL and update PATH for bun
 set -gx BUN_INSTALL $HOME/.bun
-set -gx PATH $BUN_INSTALL/bin $PATH
+fish_add_path $BUN_INSTALL/bin
 
-set -gx PATH (go env GOPATH)/bin $PATH
+fish_add_path (go env GOPATH)/bin
 
 # Update PATH for ImageMagick
-set -gx PATH /usr/local/opt/imagemagick@7/bin $PATH
+fish_add_path /usr/local/opt/imagemagick@7/bin
 
 # Mac ports
-set -gx PATH /opt/local/bin:/opt/local/sbin:$PATH
+fish_add_path /opt/local/bin:/opt/local/sbin
 
-set -gx PATH "/opt/homebrew/opt/mysql@8.4/bin:$PATH"
+fish_add_path "/opt/homebrew/opt/mysql@8.4/bin"
+
+# Added by LM Studio CLI (lms)
+fish_add_path /Users/grimaldev/.cache/lm-studio/bin
 
 set -gx EDITOR "nvim"
 
@@ -223,6 +225,4 @@ alias icat='kitten icat'
 alias uninstall="uninstall-cli.sh"
 alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
 
-
-# Added by LM Studio CLI (lms)
-set -gx PATH $PATH /Users/grimaldev/.cache/lm-studio/bin
+# alias ssh="kitty +kitten ssh"
