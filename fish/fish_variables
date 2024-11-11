@@ -84,7 +84,7 @@ SETUVAR fish_pager_color_selected_background:\x2d\x2dbackground\x3dbrblack
 SETUVAR fish_pager_color_selected_completion:\x1d
 SETUVAR fish_pager_color_selected_description:\x1d
 SETUVAR fish_pager_color_selected_prefix:\x1d
-SETUVAR fish_user_paths:/Users/grimaldev/\x2ecache/lm\x2dstudio/bin\x1e/opt/homebrew/opt/mysql\x408\x2e4/bin\x1e/Users/grimaldev/go/bin\x1e/Users/grimaldev/\x2ebun/bin\x1e/Users/grimaldev/\x2epyenv/bin\x1e/opt/homebrew/bin\x1e/opt/homebrew/opt/qt\x405/bin
+SETUVAR fish_user_paths:/opt/homebrew/bin\x1e/opt/homebrew/opt/qt\x405/bin
 SETUVAR tide_aws_bg_color:FF9900
 SETUVAR tide_aws_color:232F3E
 SETUVAR tide_aws_icon:\uf270
