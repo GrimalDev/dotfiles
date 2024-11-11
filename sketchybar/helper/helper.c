@@ -10,7 +10,8 @@ void handler(env env) {
   char* info = env_get_value_for_key(env, "INFO");
   char* selected = env_get_value_for_key(env, "SELECTED");
 
-  if ((strcmp(name, "cpu.percent") == 0)) {
+  if ((strcmp(sender, "routine") == 0)
+            || (strcmp(sender, "forced") == 0)) {
     // CPU graph updates
     cpu_update(&g_cpu);
 
@@ -22,7 +23,7 @@ int main (int argc, char** argv) {
   cpu_init(&g_cpu);
 
   if (argc < 2) {
-    printf("Usage: helper \"<bootstrap name>\"\n");
+    printf("Usage: provider \"<bootstrap name>\"\n");
     exit(1);
   }
 

@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # FIXME: Running an osascript on an application target opens that app
@@ -50,5 +49,5 @@ fi
 
 sketchybar -m --set music icon="$icon"          \
     --set music label="${title} x ${artist}"    \
-    --set music drawing=on                      \
-    label.font="sketchybar-app-font:Regular:12.0"
+    --set music drawing=on
+

@@ -1,4 +1,3 @@
-#!/bin/sh battery=( script="$PLUGIN_DIR/battery.sh" icon.font="$FONT:Regular:19.0" padding_right=3
 #!/bin/bash
 
 battery=(
