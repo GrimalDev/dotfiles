@@ -1,6 +1,3 @@
-#!/bin/bash
-
-# Color Palette
 export BLACK=0xff181926
 export WHITE=0xffcad3f5
 export RED=0xffed8796
@@ -51,3 +48,4 @@ export COLOR_BLUE_BRIGHT=0xe083a598
 export COLOR_MAGENTA_BRIGHT=0xe0d3869b
 export COLOR_CYAN_BRIGHT=0xe08ec07c
 export COLOR_WHITE_BRIGHT=0xe0ebdbb2
+
