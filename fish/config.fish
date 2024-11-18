@@ -4,6 +4,7 @@ starship init fish | source
 set -e fish_user_paths
 fish_add_path /opt/homebrew/opt/qt@5/bin
 fish_add_path /opt/homebrew/bin
+fish_add_path /opt/homebrew/sbin
 fish_add_path /opt/homebrew/Cellar/postgresql@17/17.0/bin
 if test -d /opt/homebrew
   set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
@@ -25,6 +26,11 @@ function sudo
         command sudo -E $argv
     end
 end
+
+function emptytrash
+  defaults write com.apple.finder EmptyTrashSecurely -bool false
+  sudo rm -rf ~/.Trash/*
+end 
 
 function brew
   # if there are no params, list all installed packages and install on selection else just forward the params to brew
