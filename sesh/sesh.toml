@@ -14,12 +14,12 @@ startup_command = "bash $DOTFILES/sesh/scripts/immozia"
 [[session]]
 name = "SRVWEBSTR01 🌐"
 path = "~/Documents/servers/srvwebstr01/"
-startup_command = "ssh srvwebstr01 && clear"
+startup_command = "ssh srvwebstr01 -t 'clear && exec $SHELL'"
 
 [[session]]
 name = "PI 🌐"
 path = "~/Documents/servers/pi/"
-startup_command = "ssh pi && clear"
+startup_command = "ssh pi -t 'clear && exec $SHELL'"
 
 [[session]]
 name = "Nvim ⚙️"

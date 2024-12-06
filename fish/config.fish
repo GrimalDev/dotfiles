@@ -128,7 +128,7 @@ function jqf
 end
 
 function share
-    curl -F "file=@$argv" https://0x0.st | wl-copy
+    curl -F "file=@$argv" https://0x0.st | pbcopy
 end
 
 if test -z TMUX
@@ -224,5 +224,6 @@ alias cat='bat'
 alias icat='kitten icat'
 alias uninstall="uninstall-cli.sh"
 alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
+alias tail="grc tail"
 
 # alias ssh="kitty +kitten ssh"

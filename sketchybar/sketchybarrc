@@ -82,12 +82,13 @@ defaults=(
 )
 
 sketchybar --default "${defaults[@]}"
+sketchybar -m --add event song_update com.apple.iTunes.playerInfo
 
 
 # Left
 source "$ITEM_DIR/apple.sh"
 source "$ITEM_DIR/spaces.sh"
-source "$ITEM_DIR/front_app.sh"
+# source "$ITEM_DIR/front_app.sh"
 
 # Center
 source "$ITEM_DIR/music.sh"

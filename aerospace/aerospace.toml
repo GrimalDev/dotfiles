@@ -93,6 +93,7 @@ automatically-unhide-macos-hidden-apps = false
 # PATH = '/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}'
 
 # Gaps between windows
+
 [gaps]
 inner.horizontal = 5
 inner.vertical = 2
@@ -119,10 +120,6 @@ alt-cmd-h = 'focus left'
 alt-cmd-j = 'focus down'
 alt-cmd-k = 'focus up'
 alt-cmd-l = 'focus right'
-
-# Display focus (adapted from ctrl+cmd)
-ctrl-cmd-s = 'focus-monitor prev'
-ctrl-cmd-g = 'focus-monitor next'
 
 # Window movement (preserving shift+cmd scheme)
 shift-cmd-h = 'move left'
@@ -161,8 +158,12 @@ cmd-9 = 'workspace 9'
 cmd-0 = 'workspace 10'
 
 # Monitor movement (corrected to use valid next/prev parameters)
-shift-cmd-s = 'move-workspace-to-monitor prev'
-shift-cmd-g = 'move-workspace-to-monitor next'
+shift-cmd-s = 'focus-monitor prev' 
+shift-cmd-g = 'focus-monitor next' 
+
+# Display focus (adapted from ctrl+cmd)
+ctrl-cmd-s = 'move-workspace-to-monitor prev' 
+ctrl-cmd-g = 'move-workspace-to-monitor next' 
 
 # Layout commands (corrected to use valid layout types)
 shift-cmd-y = 'layout vertical'    # Similar to y-axis mirror
@@ -178,7 +179,7 @@ shift-cmd-e = 'layout tiles horizontal vertical'  # Similar to balance
 # '''
 
 # Service mode for additional commands
-alt-shift-semicolon = 'mode service'
+ctrl-alt-semicolon = 'mode service'
 [mode.service.binding]
 # Reset, reload, and layout controls
 shift-r = ['''exec-and-forget osascript -e 'quit app "Aerospace"' -e 'delay 1' -e 'tell application "Aerospace" to activate' ''', 'mode main']
@@ -226,3 +227,7 @@ run = ['layout floating']
 if.app-id = 'net.kovidgoyal.kitty'
 if.window-title-regex-substring = 'ranger'
 run = ['layout floating']
+
+[workspace-to-monitor-force-assignment]
+10 = 'secondary'
+
