@@ -1,6 +1,5 @@
 
 # Place a copy of this config to ~/.aerospace.toml
-# After that, you can edit ~/.aerospace.toml to your liking
 
 # Start AeroSpace at login
 start-at-login = true
@@ -11,12 +10,12 @@ after-startup-command = [
     "exec-and-forget /opt/homebrew/bin/sketchybar",
     "exec-and-forget /opt/homebrew/bin/skhd",
 
-    'exec-and-forget $HOME/.config/aerospace/start_app.sh "Notion"',
-    'exec-and-forget $HOME/.config/aerospace/start_app.sh "Arc"',
-    'exec-and-forget $HOME/.config/aerospace/start_app.sh "kitty" "dev" "--title dev -e sesh connect \"Home 💻\"" "cli"',
-    'exec-and-forget $HOME/.config/aerospace/start_app.sh "kitty" "btop" "--title btop -e btop" "cli"',
-    'exec-and-forget $HOME/.config/aerospace/start_app.sh "Music"',
-    'exec-and-forget $HOME/.config/aerospace/start_app.sh "Discord"'
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Notion"',
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Arc"',
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "dev" "--title dev -e sesh connect \"Home 💻\"" "cli"',
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "btop" "--title btop -e btop" "cli"',
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Music"',
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Discord"'
 ]
 
 exec-on-workspace-change = [
@@ -24,51 +23,6 @@ exec-on-workspace-change = [
     '-c',
     '/opt/homebrew/opt/sketchybar/bin/sketchybar --trigger aerospace_workspace_change AEROSPACE_FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE AEROSPACE_PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
 ]
-
-# Workspaces setup: You may want to adjust the space labels based on your needs
-# This is a placeholder; set labels and other properties in your application
-# [workspaces]
-# workspace-1 = { name = "landing" }
-# workspace-2 = { name = "notion" }
-# workspace-3 = { name = "arc" }
-# workspace-4 = { name = "dev" }
-# workspace-5 = { name = "stats" }
-# workspace-6 = { name = "music" }
-# workspace-7 = { name = "other2" }
-# workspace-8 = { name = "other3" }
-# workspace-9 = { name = "discord" }
-
-# Application rules for managing specific apps
-# [app-rules]
-# # Exclude problematic apps from being managed
-# exclude-apps = [
-#     "Finder",
-#     "Shottr",
-#     "Calculator",
-#     "Software Update",
-#     "Dictionary",
-#     "VLC",
-#     "System Preferences",
-#     "System Settings",
-#     "Python",
-#     "Raycast",
-#     "1Password",
-#     "Parallels Desktop"
-# ]
-#
-# # Manage applications based on their titles
-# manage-apps = [
-#     { app = "Notion", space = "notion" },
-#     { app = "Arc", space = "arc" },
-#     { app = "kitty", title = "dev", space = "dev" },
-#     { app = "kitty", title = "btop", space = "stats" },
-#     { app = "Music", space = "music" },
-#     { app = "Discord", space = "discord" },
-#     { app = "kitty", title = "ranger", manage = "off", sticky = "on", grid = "6:6:1:1:4:4" },
-#     { app = "Tabby", manage = "off", sticky = "on", grid = "7:7:1:1:5:5" },
-#     { app = "rofi", manage = "off" },
-#     { app = "ChatGPT", manage = "off", sticky = "on", grid = "6:6:1:1:4:4" }
-# ]
 
 # Normalizations
 enable-normalization-flatten-containers = true
@@ -158,12 +112,12 @@ cmd-9 = 'workspace 9'
 cmd-0 = 'workspace 10'
 
 # Monitor movement (corrected to use valid next/prev parameters)
-shift-cmd-s = 'focus-monitor prev' 
-shift-cmd-g = 'focus-monitor next' 
+shift-cmd-s = 'focus-monitor prev'
+shift-cmd-g = 'focus-monitor next'
 
 # Display focus (adapted from ctrl+cmd)
-ctrl-cmd-s = 'move-workspace-to-monitor prev' 
-ctrl-cmd-g = 'move-workspace-to-monitor next' 
+ctrl-cmd-s = 'move-workspace-to-monitor prev'
+ctrl-cmd-g = 'move-workspace-to-monitor next'
 
 # Layout commands (corrected to use valid layout types)
 shift-cmd-y = 'layout vertical'    # Similar to y-axis mirror
@@ -197,7 +151,7 @@ run = ['move-node-to-workspace 3']
 
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'
-# if.window-title-regex-substring = '^dev$'
+if.window-title-regex-substring = '^dev$'
 run = ['move-node-to-workspace 4']
 
 [[on-window-detected]]
@@ -213,7 +167,15 @@ run = ['move-node-to-workspace 6']
 if.app-id = 'com.hnc.Discord'
 run = ['move-node-to-workspace 9']
 
-# Floating window rules
+# -------------- FORCE TILING -------------
+
+# [[on-window-detected]]
+# if.window-title-regex-substring='Android Emulator'
+# if.during-aerospace-startup = false
+# run = 'layout tiling'
+
+# -------------- FLOATING RULES -------------
+
 [[on-window-detected]]
 if.app-id = 'com.rofi'
 run = ['layout floating']
@@ -222,12 +184,20 @@ run = ['layout floating']
 if.app-id = 'com.openai.ChatGPT'
 run = ['layout floating']
 
-# Terminal with ranger
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'
-if.window-title-regex-substring = 'ranger'
+if.window-title-regex-substring = '^ranger$'
 run = ['layout floating']
+
+[[on-window-detected]]
+if.app-id = "com.apple.finder"
+run = ["layout floating"]
+
+# [[on-window-detected]]
+# if.app-id = "com.apple.iphonesimulator"
+# run = ["layout floating"]
+
+# -------------- MONITOR RULES -------------
 
 [workspace-to-monitor-force-assignment]
 10 = 'secondary'
-
