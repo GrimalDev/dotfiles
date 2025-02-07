@@ -44,3 +44,9 @@ ctrl - w [
   "tabby" ~
   * : /bin/bash -c "skhd -k 'alt - backspace'"
 ]
+ctrl - h [
+  "kitty" ~
+  "tabby" ~
+  * : /bin/bash -c "skhd -k 'backspace'"
+]
+

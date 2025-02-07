@@ -43,15 +43,14 @@ for m in $(aerospace list-monitors | awk '{print $1}'); do
       done <<< "${apps}"
     else
       icon_strip=" —"
-			#TODO: Grey out the space case if to apps are open in the space
     fi
 
     sketchybar --set space.$sid label="$icon_strip"
   done
 
-  # for i in $(aerospace list-workspaces --monitor $m --empty); do
-  #   sketchybar --set space.$i display=0
-  # done
+  for i in $(aerospace list-workspaces --monitor $m --empty); do
+    sketchybar --set space.$i display=0
+  done
 
 done
 

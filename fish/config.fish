@@ -9,16 +9,6 @@ if test -d /opt/homebrew
   set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
 end
 
-# Initialise environment variables from /etc/.env [644 root:admin]
-if test -f /etc/.env
-  for line in (cat /etc/.env | grep -v '^#' | grep -E '^[a-zA-Z_][a-zA-Z0-9_]*=')
-      set key (echo $line | cut -d '=' -f 1)
-      set raw_value (echo $line | cut -d '=' -f 2-)
-      set value (echo $raw_value | sed -e 's/^["'\''"]//' -e 's/["'\''"]$//')
-      set -gx $key $value
-  end
-end
-
 function mfzf
   set -l current_dir (pwd)
   cd /Users/grimaldev/Documents/projects/scripts/man-fuzzy/package_docs
@@ -50,21 +40,19 @@ end
 function __list_run_files
   if test ! -d .run
     echo "No .run directory"
-    commandline -f execute
     return
   end
-  if test (fd '^*.sh$' -t f -t l -d 1 .run | wc -l) -eq 0
+  if test (fd '^*.sh$' -t f -d 1 .run | wc -l) -eq 0
     echo "no executable files found in .run"
     return
   end
-  set -l file_to_run (fd '^*.sh$' -t f -t l -d 1 .run | fzf)
+  set -l file_to_run (fd '^*.sh$' -t f -d 1 .run | fzf)
   if test -n "$file_to_run"
     # set file_to_run (string replace -r "(\r\n|\n|\r)" "" $file_to_run)
     commandline -r "bash $file_to_run"
     commandline -f execute
   else
     echo "No file selected"
-    commandline -f execute
   end
 end
 
@@ -138,14 +126,6 @@ function jqf
   set -l file $argv[2]
   jq 'paths | map(tostring) | join(".") | select(contains("'$search_string'"))' $file
 end
-
-#function colima
-#  if "$1" = "start"
-#    colima start
-#  else
-#    colima $argv
-#  end
-#end
 
 function share
     curl -F "file=@$argv" https://0x0.st | pbcopy
@@ -245,5 +225,5 @@ alias icat='kitten icat'
 alias uninstall="uninstall-cli.sh"
 alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
 alias tail="grc tail"
-alias ff="fastfetch"
 
+# alias ssh="kitty +kitten ssh"

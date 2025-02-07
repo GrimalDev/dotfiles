@@ -1,7 +1,3 @@
-import = [
-	"~/.config/sesh/sesh-autogen.toml",
-]
-
 [default_session]
 startup_command = "nvim"
 
@@ -29,3 +25,4 @@ startup_command = "ssh pi -t 'clear && exec $SHELL'"
 name = "Nvim ⚙️"
 path = "~/.config/nvim/lua"
 
+import = ["~/.config/sesh/sesh-autogen.toml"]
