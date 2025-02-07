@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# USE sketchybar app font ligatures for the applications logo
+# https://github.com/kvndrsslr/sketchybar-app-font
+
 source "$CONFIG_DIR/colors.sh" # Loads all defined colors
 source "$CONFIG_DIR/icons.sh" # Loads all defined icons
 
