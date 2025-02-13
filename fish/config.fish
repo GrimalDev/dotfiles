@@ -9,6 +9,15 @@ if test -d /opt/homebrew
   set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
 end
 
+if test -f /etc/.env
+  cat /etc/.env | while read line
+    set -l env_var (string split -m 1 "=" $line)
+    set -l env_name $env_var[1]
+    set -l env_value $env_var[2]
+    set -gx $env_name $env_value
+  end
+end
+
 function mfzf
   set -l current_dir (pwd)
   cd /Users/grimaldev/Documents/projects/scripts/man-fuzzy/package_docs
@@ -208,7 +217,7 @@ bind -M insert -e \t '__fzf_complete'
 set -U FZF_ENABLE_OPEN_PREVIEW 0
 
 bind -M insert \ee "nvim"
-bind -M insert \ec "nvim ~/.config/fish/config.fish"
+#bind -M insert \er "ranger"
 # bind -M insert \er "ranger"
 bind -M insert \el __fish_list_current_token # my preferred listing
 bind -M insert \er __list_run_files
