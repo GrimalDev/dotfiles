@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
- 
+
 source "$CONFIG_DIR/colors.sh"
 
 AEROSPACE_FOCUSED_MONITOR=$(aerospace list-monitors --focused | awk '{print $1}')
