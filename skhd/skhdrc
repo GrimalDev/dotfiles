@@ -10,11 +10,11 @@ ctrl - k [
   * : /bin/bash -c "skhd -k 'up'"
 ]
 
-# ctrl - m [
-#   "kitty" ~
-#   "tabby" ~
-#   * : /bin/bash -c "skhd -k 'return'"
-# ]
+ctrl - m [
+  "kitty" ~
+  "tabby" ~
+  * : /bin/bash -c "skhd -k 'return'"
+]
 
 # scroll up and down
 alt - j [
