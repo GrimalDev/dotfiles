@@ -1,4 +1,3 @@
-
 # Place a copy of this config to ~/.aerospace.toml
 
 # Start AeroSpace at login
@@ -65,7 +64,7 @@ preset = 'qwerty'
 cmd-h = [] # Disable "hide application"
 
 # Ranger
-cmd-e = 'exec-and-forget kitty --title ranger -e ranger ~'
+cmd-e = 'exec-and-forget kitty --title file -e yazi ~'
 # -- Custom window layouts --
 cmd-r = 'exec-and-forget kitty -e bash /Users/grimaldev/.config/skhd/scripts/sesh-sessions.sh'
 
@@ -186,7 +185,7 @@ run = ['layout floating']
 
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'
-if.window-title-regex-substring = '^ranger$'
+if.window-title-regex-substring = '^file$'
 run = ['layout floating']
 
 [[on-window-detected]]
