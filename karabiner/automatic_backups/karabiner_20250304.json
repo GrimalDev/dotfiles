@@ -48,6 +48,10 @@
                     },
                     "simple_modifications": [
                         {
+                            "from": { "key_code": "c" },
+                            "to": [{ "key_code": "x" }]
+                        },
+                        {
                             "from": { "key_code": "caps_lock" },
                             "to": [{ "key_code": "left_control" }]
                         },
@@ -66,6 +70,14 @@
                         {
                             "from": { "key_code": "right_command" },
                             "to": [{ "key_code": "escape" }]
+                        },
+                        {
+                            "from": { "key_code": "v" },
+                            "to": [{ "key_code": "c" }]
+                        },
+                        {
+                            "from": { "key_code": "x" },
+                            "to": [{ "key_code": "v" }]
                         }
                     ]
                 },
