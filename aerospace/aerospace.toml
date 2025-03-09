@@ -189,12 +189,23 @@ if.window-title-regex-substring = '^file$'
 run = ['layout floating']
 
 [[on-window-detected]]
+if.app-id = 'com.googlecode.iterm2'
+run = ['layout floating']
+
+[[on-window-detected]]
 if.app-id = "com.apple.finder"
 run = ["layout floating"]
 
-# [[on-window-detected]]
-# if.app-id = "com.apple.iphonesimulator"
 # run = ["layout floating"]
+
+# [[window_rules]]
+# window_class = "com.googlecode.iterm2"
+# properties = { floating = true }
+# commands = [
+#     "layout floating",
+#     "move position center",
+#     "resize set 800 600"
+# ]
 
 # -------------- MONITOR RULES -------------
 

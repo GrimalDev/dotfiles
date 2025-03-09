@@ -1,6 +1,8 @@
 zoxide init fish | source
 starship init fish | source
 
+set -gx XDG_CONFIG_HOME $HOME/.config
+
 set -e fish_user_paths
 fish_add_path /opt/homebrew/opt/qt@5/bin
 fish_add_path /opt/homebrew/bin
@@ -11,6 +13,12 @@ end
 
 if test -f /etc/.env
   cat /etc/.env | while read line
+    if test -z $line
+      continue
+    end
+    if test (string match -r "^#" $line)
+      continue
+    end
     set -l env_var (string split -m 1 "=" $line)
     set -l env_name $env_var[1]
     set -l env_value $env_var[2]
@@ -235,4 +243,4 @@ alias uninstall="uninstall-cli.sh"
 alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
 alias tail="grc tail"
 
-# alias ssh="kitty +kitten ssh"
+#alias ssh="kitty +kitten ssh"
