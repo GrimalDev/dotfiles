@@ -3,9 +3,6 @@ $os\
 $username\
 $hostname\
 $directory\
-$git_branch\
-$git_state\
-$git_status\
 $c\
 $elixir\
 $elm\
@@ -20,16 +17,19 @@ $python\
 $rust\
 $scala\
 $docker_context\
+$fill\
+$git_branch\
+$git_state\
+$git_status\
 $time\
 \n$character
 """
-
-right_format = """
-$git_branch\
-"""
-
 add_newline = true
 palette = "everforest"
+
+[fill]
+symbol = " "
+style = "bold black"
 
 [os]
 disabled = false
