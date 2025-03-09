@@ -8,17 +8,17 @@ startup_command = "clear"
 
 [[session]]
 name = "Immozia 🏡"
-path = "~/Documents/work/oxianet.nosync/immozia/"
+path = "~/Code/work/oxianet/immozia/"
 startup_command = "bash $DOTFILES/sesh/scripts/immozia"
 
 [[session]]
 name = "SRVWEBSTR01 🌐"
-path = "~/Documents/servers/srvwebstr01/"
+path = "~/Code/servers/srvwebstr01/"
 startup_command = "ssh srvwebstr01 -t 'clear && exec $SHELL'"
 
 [[session]]
 name = "PI 🌐"
-path = "~/Documents/servers/pi/"
+path = "~/Code/servers/pi/"
 startup_command = "ssh pi -t 'clear && exec $SHELL'"
 
 [[session]]
