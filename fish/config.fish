@@ -3,10 +3,13 @@ starship init fish | source
 
 set -gx XDG_CONFIG_HOME $HOME/.config
 
+set -gx TERM "screen-256color"
+
 set -e fish_user_paths
 fish_add_path /opt/homebrew/opt/qt@5/bin
 fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/Cellar/postgresql@17/17.0/bin
+fish_add_path $HOME/.pub-cache/bin
 if test -d /opt/homebrew
   set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
 end
@@ -148,10 +151,6 @@ function share
     curl -F "file=@$argv" https://0x0.st | pbcopy
 end
 
-if test -z TMUX
-  set -gx TERM xterm-256color
-end
-
 fish_add_path $HOME/.pyenv/bin
 
 # Set the M2_HOME and update the PATH for Apache Maven
@@ -242,5 +241,11 @@ alias icat='kitten icat'
 alias uninstall="uninstall-cli.sh"
 alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
 alias tail="grc tail"
+alias ff="fastfetch --config ~/.config/fastfetch/config.json"
 
 #alias ssh="kitty +kitten ssh"
+
+
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init2.fish 2>/dev/null || :
