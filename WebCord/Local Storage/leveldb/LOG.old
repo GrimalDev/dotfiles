@@ -1,0 +1,15 @@
+2025/03/31-08:01:45.309 9d7 Reusing MANIFEST /home/grimaldev/.config/WebCord/Local Storage/leveldb/MANIFEST-000001
+2025/03/31-08:01:45.318 9d7 Recovering log #3
+2025/03/31-08:01:45.318 9d7 Reusing old log /home/grimaldev/.config/WebCord/Local Storage/leveldb/000003.log 
+2025/03/31-08:04:10.987 9d9 Level-0 table #5: started
+2025/03/31-08:04:10.989 9d9 Level-0 table #5: 41176 bytes OK
+2025/03/31-08:04:10.990 9d9 Delete type=0 #3
+2025/03/31-08:05:47.008 9d7 Level-0 table #7: started
+2025/03/31-08:05:47.010 9d7 Level-0 table #7: 50550 bytes OK
+2025/03/31-08:05:47.011 9d7 Delete type=0 #4
+2025/03/31-08:07:03.920 9d7 Level-0 table #9: started
+2025/03/31-08:07:03.921 9d7 Level-0 table #9: 62109 bytes OK
+2025/03/31-08:07:03.922 9d7 Delete type=0 #6
+2025/03/31-08:08:26.397 9d9 Level-0 table #11: started
+2025/03/31-08:08:26.399 9d9 Level-0 table #11: 62389 bytes OK
+2025/03/31-08:08:26.399 9d9 Delete type=0 #8
