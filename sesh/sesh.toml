@@ -25,4 +25,9 @@ startup_command = "ssh pi -t 'clear && exec $SHELL'"
 name = "Nvim ⚙️"
 path = "~/.config/nvim/lua"
 
+[[session]]
+name = "Discord  "
+path = "~/.config/discodo"
+startup_command = "discordo -t $DISCORD_TOKEN"
+
 import = ["~/.config/sesh/sesh-autogen.toml"]
