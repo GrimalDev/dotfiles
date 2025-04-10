@@ -10,6 +10,7 @@ fish_add_path /opt/homebrew/opt/qt@5/bin
 fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/Cellar/postgresql@17/17.0/bin
 fish_add_path $HOME/.pub-cache/bin
+fish_add_path $HOME/.local/bin
 if test -d /opt/homebrew
   set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
 end
