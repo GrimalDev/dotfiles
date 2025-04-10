@@ -4,7 +4,7 @@ startup_command = "nvim"
 [[session]]
 name = "Home 💻"
 path = "~"
-startup_command = "clear & ff"
+startup_command = "ff"
 
 [[session]]
 name = "Immozia 🏡"
