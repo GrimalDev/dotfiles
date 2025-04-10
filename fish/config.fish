@@ -153,6 +153,8 @@ end
 
 fish_add_path $HOME/.pyenv/bin
 
+fish_add_path $HOME/.cargo/bin
+
 # Set the M2_HOME and update the PATH for Apache Maven
 set -gx M2_HOME $HOME/apache-maven-3.9.0
 fish_add_path $M2_HOME/bin
@@ -220,7 +222,7 @@ set -U FZF_OPEN_COMMAND "fd -H -u --type f --exclude node_modules . \$dir"
 bind -M insert \Co '__fzf_open --editor'
 set -U FZF_TMUX 1
 set -e FZF_COMPLETE 0
-bind -M insert -e \t '__fzf_complete'
+bind -M insert \t '__fzf_complete'
 set -U FZF_ENABLE_OPEN_PREVIEW 0
 
 bind -M insert \ee "nvim"
