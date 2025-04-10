@@ -14,7 +14,7 @@ after-startup-command = [
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "dev" "--title dev -e sesh connect \"Home 💻\"" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "btop" "--title btop -e btop" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Music"',
-    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Discord"'
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Vesktop"'
 ]
 
 exec-on-workspace-change = [
