@@ -1,10 +1,5 @@
 #!/bin/sh
 
-#SPACE_ICONS=("1" "2" "3" "4")
-
-# Destroy space on right click, focus space on left click.
-# New space by left clicking separator (>)
-
 sketchybar --add event aerospace_workspace_change
 
 for m in $(aerospace list-monitors | awk '{print $1}'); do
@@ -54,26 +49,6 @@ for m in $(aerospace list-monitors | awk '{print $1}'); do
 
 done
 
-
-space_creator=(
-  icon=􀆊
-  icon.font="$FONT:Heavy:12.0"
-  padding_left=10
-  padding_right=8
-  label.drawing=off
-  display=active
-  script="$PLUGIN_DIR/space_windows.sh"
-  #script="$PLUGIN_DIR/aerospace.sh"
-  icon.color=$WHITE
-)
-
-# sketchybar --add item space_creator left               \
-#            --set space_creator "${space_creator[@]}"   \
-#            --subscribe space_creator space_windows_change
-sketchybar --add item space_creator left               \
-           --set space_creator "${space_creator[@]}"   \
-           --subscribe space_creator aerospace_workspace_change
-
-# sketchybar  --add item change_windows left \
-#             --set change_windows script="$PLUGIN_DIR/change_windows.sh" \
-#             --subscribe change_windows space_changes
+sketchybar  --add item space_windows left \
+            --set space_windows script="$PLUGIN_DIR/space_windows.sh" \
+            --subscribe space_windows aerospace_workspace_change

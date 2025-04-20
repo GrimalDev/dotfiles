@@ -2,12 +2,65 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-AEROSPACE_FOCUSED_MONITOR=$(aerospace list-monitors --focused | awk '{print $1}')
-AEROSAPCE_WORKSPACE_FOCUSED_MONITOR=$(aerospace list-workspaces --monitor focused --empty no)
-AEROSPACE_EMPTY_WORKESPACE=$(aerospace list-workspaces --monitor focused --empty)
+# Debug configuration
+DEBUG=false  # Master debug switch
+LOG_FILE="$CONFIG_DIR/test.log"
+
+log_debug() {
+  if [ "$DEBUG" = true ]; then
+    echo "$@" >> "$LOG_FILE"
+  fi
+}
+
+time_start() {
+  if [ "$DEBUG" = true ]; then
+    TIME_BEGIN=$(get_ms_time)
+    log_debug "---------------------------------"
+  fi
+}
+
+time_checkpoint() {
+  if [ "$DEBUG" = true ]; then
+    local checkpoint_name="$1"
+    local current_time=$(get_ms_time)
+    local elapsed=$((current_time - TIME_BEGIN))
+    log_debug "Checkpoint [$checkpoint_name]: $elapsed ms"
+  fi
+}
+
+time_end() {
+  if [ "$DEBUG" = true ]; then
+    local end_time=$(get_ms_time)
+    local elapsed=$((end_time - TIME_BEGIN))
+    log_debug "Elapsed time end: $elapsed ms"
+  fi
+}
+
+# Define state file
+STATE_FILE="$CONFIG_DIR/tmp/space_windows_state"
+
+# Create state file
+if [ ! -f "$STATE_FILE" ]; then
+  touch "$STATE_FILE"
+  echo "AEROSPACE_LAST_FOCUSED_WORKSPACE=" > "$STATE_FILE"
+fi
+
+# Load previous state
+if [ -f "$STATE_FILE" ]; then
+  source "$STATE_FILE"
+fi
+
+STATE_CACHE_UPDATE=""
+
+get_ms_time() {
+  echo $(($(gdate +%s%N)/1000000))
+}
+
+# Initialize timing if enabled
+time_start
 
 reload_workspace_icon() {
-  apps=$(aerospace list-windows --workspace "$@" | awk -F'|' '{gsub(/^ *| *$/, "", $2); print $2}')
+  local apps="$AEROSPACE_APPS_CURRENT_WORKSPACE"
 
   icon_strip=" "
   if [ "${apps}" != "" ]; then
@@ -19,56 +72,65 @@ reload_workspace_icon() {
     icon_strip=" —"
   fi
 
+  # SKETCHYBAR_CMD+="--animate sin 10 --set space.$@ label=\"$icon_strip\""
   sketchybar --animate sin 10 --set space.$@ label="$icon_strip"
 }
 
 if [ "$SENDER" = "aerospace_workspace_change" ]; then
+  # Log the persisted last workspace value
+  log_debug "last workspace: $AEROSPACE_LAST_FOCUSED_WORKSPACE"
+  log_debug "last apps: $AEROSPACE_APPS_PREV_WORKSPACE"
 
-  # if [ $i = "$FOCUSED_WORKSPACE" ]; then
-  #   sketchybar --set space.$FOCUSED_WORKSPACE background.drawing=on
-  # else
-  #   sketchybar --set space.$FOCUSED_WORKSPACE background.drawing=off
-  # fi
-  #space="$(echo "$INFO" | jq -r '.space')"
-  #apps="$(echo "$INFO" | jq -r '.apps | keys[]')"
-  # apps=$(aerospace list-windows --workspace $AEROSPACE_FOCUSED_WORKSPACE | awk -F'|' '{gsub(/^ *| *$/, "", $2); print $2}')
-  #
-  # icon_strip=" "
-  # if [ "${apps}" != "" ]; then
-  #   while read -r app
-  #   do
-  #     icon_strip+=" $($CONFIG_DIR/plugins/icon_map.sh "$app")"
-  #   done <<< "${apps}"
-  # else
-  #   icon_strip=" —"
-  # fi
-
-  reload_workspace_icon "$AEROSPACE_PREV_WORKSPACE"
+  AEROSPACE_APPS_CURRENT_WORKSPACE=$(aerospace list-windows --workspace "$AEROSPACE_FOCUSED_WORKSPACE" | awk -F'|' '{gsub(/^ *| *$/, "", $2); print $2}')
+  time_checkpoint "after aerospace query"
   reload_workspace_icon "$AEROSPACE_FOCUSED_WORKSPACE"
+  time_checkpoint "after reload_workspace_icon"
 
-  #sketchybar --animate sin 10 --set space.$space label="$icon_strip"
+  # Set display for all non-empty workspaces on the focused monitor
+  # TODO: Activate if needed
+  # for i in $AEROSAPCE_WORKSPACE_FOCUSED_MONITOR; do
+  #   if [ "$i" != "$AEROSPACE_FOCUSED_WORKSPACE" ]; then
+  #     sketchybar --set space.$i display=$AEROSPACE_FOCUSED_MONITOR
+  #   fi
+  # done
 
-  # current workspace space border color
-  sketchybar --set space.$AEROSPACE_FOCUSED_WORKSPACE icon.highlight=true \
-                         label.highlight=true \
-                         background.border_color=$GREY
+  if [ "$AEROSPACE_FOCUSED_WORKSPACE" != "$AEROSPACE_PREV_WORKSPACE" ]; then
+    SKETCHYBAR_CMD=""
 
-  # prev workspace space border color
-  sketchybar --set space.$AEROSPACE_PREV_WORKSPACE icon.highlight=false \
-                         label.highlight=false \
-                         background.border_color=$BACKGROUND_2
+    # Current workspace space settings
+    SKETCHYBAR_CMD+=" --set space.$AEROSPACE_FOCUSED_WORKSPACE icon.highlight=true \
+                   label.highlight=true \
+                   background.border_color=$GREY \
+                   display=$AEROSPACE_FOCUSED_MONITOR"
 
-  # if [ "$AEROSPACE_FOCUSED_WORKSPACE" -gt 3 ]; then
-  #   sketchybar --animate sin 10 --set space.$AEROSPACE_FOCUSED_WORKSPACE display=1
-  # fi
-  for i in $AEROSAPCE_WORKSPACE_FOCUSED_MONITOR; do
-    sketchybar --set space.$i display=$AEROSPACE_FOCUSED_MONITOR
-  done
+    # Previous workspace space settings
+    SKETCHYBAR_CMD+=" --set space.$AEROSPACE_PREV_WORKSPACE icon.highlight=false \
+                   label.highlight=false \
+                   background.border_color=$BACKGROUND_2 \
+                   display=$AEROSPACE_FOCUSED_MONITOR"
 
-  for i in $AEROSPACE_EMPTY_WORKESPACE; do
-    sketchybar --set space.$i display=0
-  done
+    # Hide empty workspaces
+    # TODO: Deactivate if not needed
+    if [ -z "$AEROSPACE_APPS_PREV_WORKSPACE" ]; then
+      SKETCHYBAR_CMD+=" --set space.$AEROSPACE_PREV_WORKSPACE display=0"
+    fi
 
-  sketchybar --set space.$AEROSPACE_FOCUSED_WORKSPACE display=$AEROSPACE_FOCUSED_MONITOR
+    sketchybar $SKETCHYBAR_CMD
+    time_checkpoint "after sketchybar update"
 
+    AEROSPACE_APPS_PREV_WORKSPACE=$(echo "$AEROSPACE_APPS_CURRENT_WORKSPACE" | tr '\n' ',' | sed 's/,$//')
+    STATE_CACHE_UPDATE+="\nAEROSPACE_APPS_PREV_WORKSPACE=\"$AEROSPACE_APPS_PREV_WORKSPACE\""
+  fi
+
+  log_debug "current workspace: $AEROSPACE_FOCUSED_WORKSPACE"
+  log_debug "current apps: $AEROSPACE_APPS_CURRENT_WORKSPACE"
 fi
+
+STATE_CACHE_UPDATE+="\nAEROSPACE_PREV_FOCUSED_WORKSPACE=\"$AEROSPACE_FOCUSED_WORKSPACE\""
+
+if [ "$STATE_CACHE_UPDATE" != "" ]; then
+  echo -e "$STATE_CACHE_UPDATE" > "$STATE_FILE"
+fi
+
+# Log final timing and workspace information
+time_end
