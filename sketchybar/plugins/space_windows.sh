@@ -37,9 +37,12 @@ time_end() {
 }
 
 # Define state file
-STATE_FILE="$CONFIG_DIR/tmp/space_windows_state"
+STATE_FILE="$HOME/.cache/sketchybar/space_windows_state"
 
-# Create state file
+# Make sure everything is set up
+if [ ! -d "$HOME/.cache/sketchybar" ]; then
+  mkdir -p "$HOME/.cache/sketchybar"
+fi
 if [ ! -f "$STATE_FILE" ]; then
   touch "$STATE_FILE"
   echo "AEROSPACE_LAST_FOCUSED_WORKSPACE=" > "$STATE_FILE"
