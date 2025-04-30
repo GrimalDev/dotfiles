@@ -11,7 +11,7 @@ PADDINGS=3 # All paddings use this value (icon, label, background)
 
 # aerospace setting
 AEROSPACE_FOCUSED_MONITOR_NO=$(aerospace list-workspaces --focused)
-AEROSPACE_LIST_OF_WINDOWS_IN_FOCUSED_MONITOR=$(aerospace list-windows --workspace $AEROSPACE_FOCUSED_MONITOR_NO | awk -F'|' '{gsub(/^ *| *$/, "", $2); print $2}')
+AEROSPACE_LIST_OF_WINDOWS_IN_FOCUSED_MONITOR=$(bash -c '/opt/homebrew/bin/aerospace list-windows --workspace "'"$AEROSPACE_FOCUSED_WORKSPACE"'" --json | /opt/homebrew/bin/jq -r '"'"'.[] | select(."window-title"!="") | ."app-name"'"'"'')
 
 # Setting up and starting the helper process
 HELPER=git.felix.helper

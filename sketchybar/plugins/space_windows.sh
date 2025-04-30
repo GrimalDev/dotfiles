@@ -4,10 +4,13 @@ source "$CONFIG_DIR/colors.sh"
 
 # Debug configuration
 DEBUG=false  # Master debug switch
-LOG_FILE="$CONFIG_DIR/test.log"
+LOG_FILE="$HOME/.local/share/sketchybar/test.log"
 
 log_debug() {
   if [ "$DEBUG" = true ]; then
+    if [ ! -d "$HOME/.local/share/sketchybar" ]; then
+      mkdir -p "$HOME/.local/share/sketchybar"
+    fi
     echo "$@" >> "$LOG_FILE"
   fi
 }
@@ -56,7 +59,7 @@ fi
 STATE_CACHE_UPDATE=""
 
 get_ms_time() {
-  echo $(($(gdate +%s%N)/1000000))
+  echo $(($(command -v gdate >/dev/null && /opt/homebrew/bin/gdate +%s%N || date +%s000000000)/1000000))
 }
 
 # Initialize timing if enabled
@@ -67,6 +70,20 @@ reload_workspace_icon() {
 
   icon_strip=" "
   if [ "${apps}" != "" ]; then
+    # # Avoid subshell for each app by pre-loading icon map
+    # declare -A app_icons
+    # # Source the icon map once instead of calling it repeatedly
+    # eval "$(cat "$CONFIG_DIR/plugins/icon_map.sh" | grep -v "^#\|^$\|^#!/")"
+    #
+    # while read -r app
+    # do
+    #   # only once per app
+    #   if [ -z "${app_icons[$app]}" ]; then
+    #     app_icons[$app]="$($CONFIG_DIR/plugins/icon_map.sh "$app")"
+    #   fi
+    #   icon_strip+=" ${app_icons[$app]}"
+    # done <<< "${apps}"
+
     while read -r app
     do
       icon_strip+=" $($CONFIG_DIR/plugins/icon_map.sh "$app")"
@@ -84,7 +101,13 @@ if [ "$SENDER" = "aerospace_workspace_change" ]; then
   log_debug "last workspace: $AEROSPACE_LAST_FOCUSED_WORKSPACE"
   log_debug "last apps: $AEROSPACE_APPS_PREV_WORKSPACE"
 
-  AEROSPACE_APPS_CURRENT_WORKSPACE=$(aerospace list-windows --workspace "$AEROSPACE_FOCUSED_WORKSPACE" | awk -F'|' '{gsub(/^ *| *$/, "", $2); print $2}')
+  time_checkpoint "before aerospace query"
+
+  # # Use exec to avoid subshell creation
+  # exec {aerospace_fd}> >(exec /opt/homebrew/bin/aerospace list-windows --workspace "$AEROSPACE_FOCUSED_WORKSPACE")
+  # AEROSPACE_APPS_CURRENT_WORKSPACE=$(awk -F'|' '{gsub(/^ *| *$/, "", $2); print $2}' <&${aerospace_fd})
+  # exec {aerospace_fd}>&-
+  AEROSPACE_APPS_CURRENT_WORKSPACE=$(bash -c '/opt/homebrew/bin/aerospace list-windows --workspace "'"$AEROSPACE_FOCUSED_WORKSPACE"'" --json | /opt/homebrew/bin/jq -r '"'"'.[] | select(."window-title"!="") | ."app-name"'"'"'')
   time_checkpoint "after aerospace query"
   reload_workspace_icon "$AEROSPACE_FOCUSED_WORKSPACE"
   time_checkpoint "after reload_workspace_icon"
