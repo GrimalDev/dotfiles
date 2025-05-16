@@ -5,7 +5,7 @@ start-at-login = true
 
 # Start applications after AeroSpace startup
 after-startup-command = [
-    "exec-and-forget /opt/homebrew/bin/borders style=round hdpi=1 width=3.0 active_color=0xff81a1c1 inactive_color=0xfe2e3440",
+    "exec-and-forget /opt/homebrew/bin/borders style=round hdpi=1 width=3.0 active_color=0xffa3be8c inactive_color=0xfe3b4252",
     "exec-and-forget /opt/homebrew/bin/sketchybar",
     "exec-and-forget /opt/homebrew/bin/skhd",
 
@@ -163,7 +163,7 @@ if.app-id = 'com.apple.Music'
 run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
-if.app-id = 'com.hnc.Discord'
+if.app-id = 'dev.vencord.vesktop'
 run = ['move-node-to-workspace 9']
 
 # -------------- FORCE TILING -------------

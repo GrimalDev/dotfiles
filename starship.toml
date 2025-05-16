@@ -26,6 +26,7 @@ $time\
 """
 add_newline = true
 palette = "everforest"
+command_timeout = 3600
 
 [fill]
 symbol = " "

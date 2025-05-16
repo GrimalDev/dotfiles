@@ -30,4 +30,9 @@ name = "Discord  "
 path = "~/.config/discodo"
 startup_command = "discordo -t $DISCORD_TOKEN"
 
+[[session]]
+name = "Whatsapp  "
+path = "~/.config/nchat"
+startup_command = "nchat"
+
 import = ["~/.config/sesh/sesh-autogen.toml"]
