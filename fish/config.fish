@@ -11,6 +11,7 @@ fish_add_path /opt/homebrew/bin
 fish_add_path /opt/homebrew/Cellar/postgresql@17/17.0/bin
 fish_add_path $HOME/.pub-cache/bin
 fish_add_path $HOME/.local/bin
+fish_add_path $HOME/.rbenv/versions/3.4.2/bin/
 if test -d /opt/homebrew
   set -gx PKG_CONFIG_PATH "/opt/homebrew/opt/qt@5/lib/pkgconfig"
 end
@@ -53,8 +54,19 @@ function brew
     set -l packet $(bash -c "(curl -s https://formulae.brew.sh/api/formula.json && curl -s https://formulae.brew.sh/api/cask.json) | jq -r '.[].full_name, .[].full_token | select(.!=null)'" | fzf)
     command brew install $packet
     set -e packages
+  else if test "$argv" = "update" || test "$argv" = "upgrade"
+    /opt/homebrew/opt/sketchybar/bin/sketchybar --trigger brew_udpate
+    command brew $argv
   else
     command brew $argv
+  end
+end
+
+function jj
+  if test "$argv" = ""
+    command jj --limit 5
+  else
+    command jj $argv
   end
 end
 
@@ -226,6 +238,8 @@ set -e FZF_COMPLETE 0
 bind -M insert \t '__fzf_complete'
 set -U FZF_ENABLE_OPEN_PREVIEW 0
 
+set -gx HOMEBREW_NO_AUTO_UPDATE 1
+
 bind -M insert \ee "nvim"
 #bind -M insert \er "ranger"
 # bind -M insert \er "ranger"
@@ -245,6 +259,8 @@ alias uninstall="uninstall-cli.sh"
 alias dots="git --git-dir=$DOTFILES_MIRROR --work-tree=$DOTFILES"
 alias tail="grc tail"
 alias ff="fastfetch --config ~/.config/fastfetch/config.json"
+alias trash="rm -rf ~/.Trash/* && rm -rf ~/.Trash/.*"
+alias col="colima start --vm-type=vz --mount-type=virtiofs"
 
 #alias ssh="kitty +kitten ssh"
 
