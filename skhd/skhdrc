@@ -34,6 +34,8 @@ ctrl - w [
   "tabby" ~
   * : /bin/bash -c "skhd -k 'alt - backspace'"
 ]
+
+shift + alt + cmd - l : /bin/bash -c "pmset sleepnow"
 # ctrl - h [
 #   "kitty" ~
 #   "tabby" ~
