@@ -5,7 +5,7 @@ start-at-login = true
 
 # Start applications after AeroSpace startup
 after-startup-command = [
-    "exec-and-forget /opt/homebrew/bin/borders style=round hdpi=1 width=3.0 active_color=0xffa3be8c inactive_color=0xfe3b4252",
+    # "exec-and-forget /opt/homebrew/bin/borders style=round hdpi=1 width=3.0 active_color=0xffa3be8c inactive_color=0xfe3b4252",
     "exec-and-forget /opt/homebrew/bin/sketchybar",
     "exec-and-forget /opt/homebrew/bin/skhd",
 
@@ -179,9 +179,9 @@ run = ['move-node-to-workspace 9']
 if.app-id = 'com.rofi'
 run = ['layout floating']
 
-[[on-window-detected]]
-if.app-id = 'com.openai.ChatGPT'
-run = ['layout floating']
+# [[on-window-detected]]
+# if.app-id = 'com.openai.ChatGPT'
+# run = ['layout floating']
 
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'
@@ -194,6 +194,10 @@ run = ['layout floating']
 
 [[on-window-detected]]
 if.app-id = "com.apple.finder"
+run = ["layout floating"]
+
+[[on-window-detected]]
+if.app-id = "com.derlien.DiskInventoryX"
 run = ["layout floating"]
 
 # run = ["layout floating"]

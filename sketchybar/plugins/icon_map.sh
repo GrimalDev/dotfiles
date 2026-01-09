@@ -561,6 +561,9 @@ function __icon_map() {
    "MacVim" | "Vim" | "VimR")
         icon_result=":vim:"
         ;;
+   "Moonlight")
+        icon_result=":moonlight:"
+        ;;
    "Vivaldi")
         icon_result=":vivaldi:"
         ;;

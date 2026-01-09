@@ -12,6 +12,11 @@ path = "~/Code/work/oxianet/immozia/"
 startup_command = "bash $DOTFILES/sesh/scripts/immozia"
 
 [[session]]
+name = "Monitor Control 🎛️"
+path = "~/Code/work/oxianet/monitor-control"
+startup_command = "bash $DOTFILES/sesh/scripts/monitor_control"
+
+[[session]]
 name = "SRVWEBSTR01 🌐"
 path = "~/Code/servers/srvwebstr01/"
 startup_command = "ssh srvwebstr01 -t 'clear && exec $SHELL'"
@@ -34,5 +39,10 @@ startup_command = "discordo -t $DISCORD_TOKEN"
 name = "Whatsapp  "
 path = "~/.config/nchat"
 startup_command = "nchat"
+
+[[session]]
+name = "LeetCode 🧩"
+path = "~/leetcode"
+startup_command = "bash $DOTFILES/sesh/scripts/leetcode"
 
 import = ["~/.config/sesh/sesh-autogen.toml"]

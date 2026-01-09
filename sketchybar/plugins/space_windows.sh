@@ -137,9 +137,9 @@ if [ "$SENDER" = "aerospace_workspace_change" ]; then
 
     # Hide empty workspaces
     # TODO: Deactivate if not needed
-    if [ -z "$AEROSPACE_APPS_PREV_WORKSPACE" ]; then
-      SKETCHYBAR_CMD+=" --set space.$AEROSPACE_PREV_WORKSPACE display=0"
-    fi
+    # if [ -z "$AEROSPACE_APPS_PREV_WORKSPACE" ]; then
+    #   SKETCHYBAR_CMD+=" --set space.$AEROSPACE_PREV_WORKSPACE display=0"
+    # fi
 
     sketchybar $SKETCHYBAR_CMD
     time_checkpoint "after sketchybar update"

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+tmux_session="LeetCode\ 🧩"
+
+tmux send-keys -t "${tmux_session}:1" "nvim -c ':Leet'" Enter
