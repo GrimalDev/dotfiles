@@ -1,9 +1,15 @@
 modmap:
   - name: Global
+    device:
+      not:
+        - "ZMK Project Corne Keyboard"
+        - "Corne Keyboard"
+        - "corne keyboard"
     remap:
       CapsLock: Ctrl_L
-
-      Alt_R: Esc # for Ctrl+Click
+      Super_R: Esc
+      Super_L: Alt_L
+      Alt_L: Super_L
 
 keymap:
   - name: all
@@ -14,7 +20,7 @@ keymap:
     application:
       only: 1Password
     remap:
-      C-dot: C-k
+      # C-dot: C-k
       C-w: C-backspace
       C-h: backspace
       # C-m: enter
@@ -38,7 +44,7 @@ keymap:
     application:
       only: Notion
     remap:
-      C-dot: C-k
+      # C-dot: C-k
       C-w: C-backspace
       C-h: backspace
       # C-m: enter
@@ -60,42 +66,38 @@ keymap:
       C-j: down
       C-k: up
 
-  - name: discord
-    application:
-      only: [discord, vesktop]
-    remap:
-      C-dot: C-k
-      C-w: C-backspace
-      C-h: backspace
-      # C-m: enter
-
-      M-j: M-down
-      M-k: M-up
-      M-h: left
-      M-l: right
-      M-C-h: C-left
-      M-C-l: C-right
-      Super-M-l: Super-M-l
-
-      M-a: C-1
-      M-s: C-2
-      M-d: C-3
-      M-f: C-4
-      M-g: C-5
-      M-z: C-6
-      M-v: C-7
-      M-x: C-8
-      M-c: C-9 
-      M-b: C-0
-
-      C-j: down
-      C-k: up
+  # - name: discord
+  #   application:
+  #     only: [discord, vesktop]
+  #   remap:
+  #     C-dot: C-k
+  #     C-w: C-backspace
+  #     C-h: backspace
+  #     # C-m: enter
+  #
+  #     M-j: M-down
+  #     M-k: M-up
+  #     M-h: left
+  #     M-C-l: C-right
+  #     Super-M-l: Super-M-l
+  #
+  #     M-a: C-1
+  #     M-s: C-2
+  #     M-d: C-3
+  #     M-f: C-4
+  #     M-g: C-5
+  #     M-z: C-6
+  #     M-v: C-7
+  #     M-b: C-0
+  #
+  #     C-j: down
+  #     C-k: up
 
   - name: webbrowser
     application:
       only: [chromium, firefox]
     remap:
-      C-dot: C-k
+      # C-dot: C-k
       C-w: C-backspace
       C-h: backspace
       # C-m: enter

@@ -2,27 +2,47 @@
 startup_command = "nvim"
 
 [[session]]
-name = "Home 💻"
+name = "Home "
 path = "~"
-startup_command = "clear"
+startup_command = "ff"
 
 [[session]]
-name = "Immozia 🏡"
-path = "~/Documents/work/oxianet.nosync/immozia/"
+name = "Immozia 󰴕"
+path = "~/Code/work/oxianet/Immozia/"
 startup_command = "bash $DOTFILES/sesh/scripts/immozia"
 
 [[session]]
-name = "SRVWEBSTR01 🌐"
-path = "~/Documents/servers/srvwebstr01/"
-startup_command = "ssh srvwebstr01 && clear"
+name = "Monitor Control 󰨇"
+path = "~/Code/work/oxianet/monitor-control"
+startup_command = "bash $DOTFILES/sesh/scripts/monitor_control"
 
 [[session]]
-name = "PI 🌐"
-path = "~/Documents/servers/pi/"
-startup_command = "ssh pi && clear"
+name = "SRVWEBSTR01 "
+path = "~/Code/servers/srvwebstr01/"
+startup_command = "ssh srvwebstr01 -t 'clear && exec $SHELL'"
+
+[[session]]
+name = "PI "
+path = "~/Code/servers/pi/"
+startup_command = "ssh pi -t 'clear && exec $SHELL'"
 
 [[session]]
 name = "Nvim ⚙️"
 path = "~/.config/nvim/lua"
+
+[[session]]
+name = "Discord  "
+path = "~/.config/discodo"
+startup_command = "discordo -t $DISCORD_TOKEN"
+
+[[session]]
+name = "Whatsapp  "
+path = "~/.config/nchat"
+startup_command = "nchat"
+
+[[session]]
+name = "LeetCode "
+path = "~/leetcode"
+startup_command = "bash $DOTFILES/sesh/scripts/leetcode"
 
 import = ["~/.config/sesh/sesh-autogen.toml"]

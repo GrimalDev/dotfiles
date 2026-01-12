@@ -13,6 +13,7 @@ $java\
 $julia\
 $nodejs\
 $nim\
+$php\
 $python\
 $rust\
 $scala\
@@ -120,66 +121,72 @@ style = "fg:#D3C6AA"
 format = '[ $symbol $context ]($style)'
 
 [c]
-symbol = " "
+symbol = ""
 style = "fg:#D3C6AA"
 format = '[ $symbol ($version) ]($style)'
 
 [elixir]
-symbol = " "
+symbol = ""
 style = "fg:#D3C6AA"
 format = '[ $symbol ($version) ]($style)'
 
 [elm]
-symbol = " "
+symbol = ""
 style = "fg:#D3C6AA"
 format = '[ $symbol ($version) ]($style)'
 
 [golang]
-symbol = " "
+symbol = ""
 style = "fg:#d3c6aa"
 format = '[ $symbol ($version) ]($style)'
 
 [gradle]
+symbol = ""
 style = "fg:#d3c6aa"
 format = '[ $symbol ($version) ]($style)'
 
 [haskell]
-symbol = " "
+symbol = ""
 style = "fg:#d3c6aa"
 format = '[ $symbol ($version) ]($style)'
 
 [java]
-symbol = " "
+symbol = ""
 style = "fg:#d3c6aa"
 format = '[ $symbol ($version) ]($style)'
 
 [julia]
-symbol = " "
+symbol = ""
 style = "fg:#d3c6aa"
 format = '[ $symbol ($version) ]($style)'
 
 [nodejs]
-symbol = ""
+symbol = "󰎙"
 style = "fg:#d3c6aa"
 format = '[ $symbol ($version) ]($style)'
 
 [nim]
-symbol = "󰆥 "
+symbol = ""
+style = "fg:#d3c6aa"
+format = '[ $symbol ($version) ]($style)'
+
+[php]
+symbol = ""
 style = "fg:#d3c6aa"
 format = '[ $symbol ($version) ]($style)'
 
 [python]
-symbol = "🐍 "
+symbol = ""
 style = "fg:#a7c080"
 format = '[ $symbol ($version)(\($virtualenv\)) ]($style)'
 
 [rust]
-symbol = " "
+symbol = ""
 style = "fg:#e69875"
 format = '[ $symbol ($version) ]($style)'
 
 [scala]
-symbol = " "
+symbol = ""
 style = "fg:#d3c6aa"
 format = '[ $symbol ($version) ]($style)'
 
