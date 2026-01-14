@@ -1,10 +1,8 @@
 modmap:
-  - name: Global
+  - name: InternalOnly
     device:
-      not:
-        - "ZMK Project Corne Keyboard"
-        - "Corne Keyboard"
-        - "corne keyboard"
+      only:
+        - "Apple SPI Keyboard"
     remap:
       CapsLock: Ctrl_L
       Super_R: Esc

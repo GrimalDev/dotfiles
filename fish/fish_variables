@@ -18,4 +18,4 @@ SETUVAR _fisher_jorgebucaran_2F_fisher_files:\x7e/\x2econfig/fish/functions/fish
 SETUVAR _fisher_plugins:jorgebucaran/fisher\x1ejethrokuan/fzf
 SETUVAR _fisher_upgraded_to_4_4:\x1d
 SETUVAR fish_greeting:\x1d
-SETUVAR fish_user_paths:/home/grimaldev/\x2ecargo/bin\x1e/bin\x1e/home/grimaldev/\x2ebun/bin\x1e/home/grimaldev/go/bin
+SETUVAR fish_user_paths:/home/grimaldev/\x2elocal/bin\x1e/home/grimaldev/\x2ecargo/bin\x1e/bin\x1e/home/grimaldev/\x2ebun/bin\x1e/home/grimaldev/go/bin
