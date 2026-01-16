@@ -1,41 +1,55 @@
 # Control actions remaps
 ctrl - j [
   "kitty" ~
-  "tabby" ~
-  * : /bin/bash -c "skhd -k 'down'"
+  * : skhd -k 'down'
 ]
 ctrl - k [
   "kitty" ~
-  "tabby" ~
-  * : /bin/bash -c "skhd -k 'up'"
+  * : skhd -k 'up'
 ]
 
 ctrl - m [
   "kitty" ~
-  "tabby" ~
-  * : /bin/bash -c "skhd -k 'return'"
+  * : skhd -k 'return'
 ]
 
 # scroll up and down
 alt - j [
   "kitty" ~
   "tabby" ~
-  * : /bin/bash -c "skhd -k 'pagedown'"
+  * : skhd -k 'pagedown'
 ]
 alt - k [
   "kitty" ~
-  "tabby" ~
-  * : /bin/bash -c "skhd -k 'pageup'"
+  * : skhd -k 'pageup'
 ]
 
 # text manipulation controls
 ctrl - w [
   "kitty" ~
-  "tabby" ~
-  * : /bin/bash -c "skhd -k 'alt - backspace'"
+  * : skhd -k 'alt - backspace'
 ]
 
 shift + alt + cmd - l : /bin/bash -c "pmset sleepnow"
+
+
+ctrl - a [
+  "kitty" ~
+  * : skhd -k 'cmd - a'
+]
+ctrl - c [
+  "kitty" ~
+  * : skhd -k 'cmd - c'
+]
+ctrl - v [
+  "kitty" ~
+  * : skhd -k 'cmd - v'
+]
+shift + ctrl - v : skhd -k 'cmd - v'
+ctrl - v [
+  "kitty" ~
+  * : skhd -k 'cmd - v'
+]
 # ctrl - h [
 #   "kitty" ~
 #   "tabby" ~
