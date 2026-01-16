@@ -5,7 +5,7 @@ desc = "Enter the child directory, or open the file"
 
 [[mgr.prepend_keymap]]
 on   = "i"
-run  = "plugin max-preview"
+run  = "plugin zoom 5"
 desc = "Maximize or restore preview"
 
 [[mgr.prepend_keymap]]

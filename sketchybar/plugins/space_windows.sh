@@ -66,34 +66,8 @@ get_ms_time() {
 time_start
 
 reload_workspace_icon() {
-  local apps="$AEROSPACE_APPS_CURRENT_WORKSPACE"
-
-  icon_strip=" "
-  if [ "${apps}" != "" ]; then
-    # # Avoid subshell for each app by pre-loading icon map
-    # declare -A app_icons
-    # # Source the icon map once instead of calling it repeatedly
-    # eval "$(cat "$CONFIG_DIR/plugins/icon_map.sh" | grep -v "^#\|^$\|^#!/")"
-    #
-    # while read -r app
-    # do
-    #   # only once per app
-    #   if [ -z "${app_icons[$app]}" ]; then
-    #     app_icons[$app]="$($CONFIG_DIR/plugins/icon_map.sh "$app")"
-    #   fi
-    #   icon_strip+=" ${app_icons[$app]}"
-    # done <<< "${apps}"
-
-    while read -r app
-    do
-      icon_strip+=" $($CONFIG_DIR/plugins/icon_map.sh "$app")"
-    done <<< "${apps}"
-  else
-    icon_strip=" —"
-  fi
-
-  # SKETCHYBAR_CMD+="--animate sin 10 --set space.$@ label=\"$icon_strip\""
-  sketchybar --animate sin 10 --set space.$@ label="$icon_strip"
+  # Icons disabled - do nothing
+  return
 }
 
 if [ "$SENDER" = "aerospace_workspace_change" ]; then
