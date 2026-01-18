@@ -49,10 +49,10 @@ automatically-unhide-macos-hidden-apps = false
 
 [gaps]
 inner.horizontal = 5
-inner.vertical = 2
-outer.left = 5
+inner.vertical = 5
+outer.left = [{ monitor.main = 57 }, 5]
 outer.bottom = 5
-outer.top = [{ monitor.main = 35 }, 5]
+outer.top = 5
 outer.right = 5
 
 # Key mapping

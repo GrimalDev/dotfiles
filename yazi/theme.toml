@@ -1,3 +1,10 @@
 [flavor]
 dark = "everforest-medium"
 
+[spot]
+border = { fg = "#a7c080" }
+title = { fg = "#a7c080" }
+
+# Table.
+tbl_cell = { fg = "#a7c080", reversed = true }
+tbl_col = { fg = "#a7c080" }

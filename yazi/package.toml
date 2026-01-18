@@ -29,9 +29,9 @@ rev = "56971d0"
 hash = "36a484acf6a0a0219c543ccb4cee218f"
 
 [[plugin.deps]]
-use = "yazi-rs/plugins:zoom"
-rev = "56971d0"
-hash = "a638db397a5a41d3f3a08a7427ccead1"
+use = "boydaihungst/file-extra-metadata"
+rev = "4fbb106"
+hash = "8765a20c837f4be5718f89ab1cf33b4"
 
 [[flavor.deps]]
 use = "Chromium-3-Oxide/everforest-medium"
