@@ -45,7 +45,12 @@ ctrl - v [
   "kitty" ~
   * : skhd -k 'cmd - v'
 ]
+ctrl - z [
+  "kitty" ~
+  * : skhd -k 'cmd - z'
+]
 shift + ctrl - v : skhd -k 'cmd - v'
+shift + ctrl - c : skhd -k 'shift + cmd - c'
 ctrl - v [
   "kitty" ~
   * : skhd -k 'cmd - v'
