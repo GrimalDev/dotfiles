@@ -10,11 +10,11 @@ after-startup-command = [
     "exec-and-forget /opt/homebrew/bin/skhd",
 
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Notion"',
-    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Arc"',
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Zen"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "dev" "--title dev -e sesh connect \"Home 💻\"" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "btop" "--title btop -e btop" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Music"',
-    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Vesktop"'
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Equibop"'
 ]
 
 exec-on-workspace-change = [
@@ -37,7 +37,7 @@ default-root-container-orientation = 'auto'
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
 # Window management preferences
-automatically-unhide-macos-hidden-apps = false
+automatically-unhide-macos-hidden-apps = true
 
 # [exec]
 # inherit-env-vars = true
@@ -50,7 +50,7 @@ automatically-unhide-macos-hidden-apps = false
 [gaps]
 inner.horizontal = 5
 inner.vertical = 5
-outer.left = [{ monitor.main = 57 }, 5]
+outer.left = [{ monitor.main = 55 }, 5]
 outer.bottom = 5
 outer.top = 5
 outer.right = 5
@@ -87,16 +87,16 @@ ctrl-cmd-k = 'resize smart +50'
 ctrl-cmd-l = 'resize smart +50'
 
 # Workspace movement (preserving ctrl+cmd scheme for moving windows)
-shift-cmd-1 = 'move-node-to-workspace 1'
-shift-cmd-2 = 'move-node-to-workspace 2'
-shift-cmd-3 = 'move-node-to-workspace 3'
-shift-cmd-4 = 'move-node-to-workspace 4'
-shift-cmd-5 = 'move-node-to-workspace 5'
-shift-cmd-6 = 'move-node-to-workspace 6'
-shift-cmd-7 = 'move-node-to-workspace 7'
-shift-cmd-8 = 'move-node-to-workspace 8'
-shift-cmd-9 = 'move-node-to-workspace 9'
-shift-cmd-0 = 'move-node-to-workspace 10'
+shift-cmd-1 = 'move-node-to-workspace 1 --focus-follows-window'
+shift-cmd-2 = 'move-node-to-workspace 2 --focus-follows-window'
+shift-cmd-3 = 'move-node-to-workspace 3 --focus-follows-window'
+shift-cmd-4 = 'move-node-to-workspace 4 --focus-follows-window'
+shift-cmd-5 = 'move-node-to-workspace 5 --focus-follows-window'
+shift-cmd-6 = 'move-node-to-workspace 6 --focus-follows-window'
+shift-cmd-7 = 'move-node-to-workspace 7 --focus-follows-window'
+shift-cmd-8 = 'move-node-to-workspace 8 --focus-follows-window'
+shift-cmd-9 = 'move-node-to-workspace 9 --focus-follows-window'
+shift-cmd-0 = 'move-node-to-workspace 10 --focus-follows-window'
 
 # Workspace focus (preserving cmd scheme)
 cmd-1 = 'workspace 1'
@@ -145,7 +145,7 @@ if.app-id = 'notion.id'
 run = ['move-node-to-workspace 2']
 
 [[on-window-detected]]
-if.app-id = 'company.thebrowser.Browser'
+if.app-id = 'app.zen-browser.zen'
 run = ['move-node-to-workspace 3']
 
 [[on-window-detected]]
@@ -163,7 +163,7 @@ if.app-id = 'com.apple.Music'
 run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
-if.app-id = 'dev.vencord.vesktop'
+if.app-id = 'org.equicord.equibop'
 run = ['move-node-to-workspace 9']
 
 # -------------- FORCE TILING -------------
@@ -198,6 +198,10 @@ run = ["layout floating"]
 
 [[on-window-detected]]
 if.app-id = "com.derlien.DiskInventoryX"
+run = ["layout floating"]
+
+[[on-window-detected]]
+if.app-id = "com.1password.1password"
 run = ["layout floating"]
 
 # run = ["layout floating"]
