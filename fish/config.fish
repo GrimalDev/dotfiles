@@ -70,8 +70,12 @@ function sudo
     if test "$argv" = !!
         eval command sudo -E $history[1]
     else
-        set -x TERMINFO "$TERMINFO"
-        command sudo -E $argv
+        set -l cmd $argv[1]
+        if functions -q $cmd
+            command sudo -E fish -i -c "$cmd $argv[2..]"
+        else
+            command sudo -E $argv
+        end
     end
 end
 
