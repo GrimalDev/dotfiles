@@ -7,5 +7,5 @@ function qrcode
     qrtool encode "$argv" -o $temp_file
     osascript -e "set imageData to (read (POSIX file \"$temp_file\") as {«class PNGf»})" -e "set the clipboard to imageData"
     rm $temp_file
-    echo "QR code for '$argv' copied to clipboard (Cmd+V to paste)"
+    echo "QR code for '$argv' copied to clipboard"
 end
