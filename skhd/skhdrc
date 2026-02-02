@@ -12,27 +12,6 @@ ctrl - m [
   "kitty" ~
   * : skhd -k 'return'
 ]
-
-# scroll up and down
-alt - j [
-  "kitty" ~
-  "tabby" ~
-  * : skhd -k 'pagedown'
-]
-alt - k [
-  "kitty" ~
-  * : skhd -k 'pageup'
-]
-
-# text manipulation controls
-ctrl - w [
-  "kitty" ~
-  * : skhd -k 'alt - backspace'
-]
-
-shift + alt + cmd - l : /bin/bash -c "pmset sleepnow"
-
-
 ctrl - a [
   "kitty" ~
   * : skhd -k 'cmd - a'
@@ -55,9 +34,76 @@ ctrl - v [
   "kitty" ~
   * : skhd -k 'cmd - v'
 ]
+
+# scroll up and down
+alt - j [
+  "kitty" ~
+  "tabby" ~
+  * : skhd -k 'pagedown'
+]
+alt - k [
+  "kitty" ~
+  * : skhd -k 'pageup'
+]
+
+# text manipulation controls
+ctrl - w [
+  "kitty" ~
+  * : skhd -k 'alt - backspace'
+]
+
+# System control
+
+shift + alt + cmd - l : /bin/bash -c "pmset sleepnow"
+
 # ctrl - h [
 #   "kitty" ~
 #   "tabby" ~
 #   * : /bin/bash -c "skhd -k 'backspace'"
 # ]
 
+# Browser
+
+alt - a [
+  "zen" : skhd -k 'alt - 1'
+]
+alt - s [
+  "zen" : skhd -k 'alt - 2'
+]
+alt - d [
+  "zen" : skhd -k 'alt - 3'
+]
+alt - f [
+  "zen" : skhd -k 'alt - 4'
+]
+alt - g [
+  "zen" : skhd -k 'alt - 5'
+]
+alt - z [
+  "zen" : skhd -k 'alt - 6'
+]
+alt - v [
+  "zen" : skhd -k 'alt - 7'
+]
+alt - x [
+  "zen" : skhd -k 'alt - 8'
+]
+alt - c [
+  "zen" : skhd -k 'alt - 9'
+]
+alt - b [
+  "zen" : skhd -k 'alt - 0'
+]
+
+shift + alt - f [
+  "zen" : skhd -k 'shift + alt - !'
+]
+shift + alt - d [
+  "zen" : skhd -k 'shift + alt - @'
+]
+shift + alt - s [
+  "zen" : skhd -k 'shift + alt - #'
+]
+shift + alt - a [
+  "zen" : skhd -k 'shift + alt - $'
+]
