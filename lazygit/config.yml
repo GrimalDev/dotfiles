@@ -1,3 +1,10 @@
+customCommands:
+  - key: 'D'
+    context: 'files'
+    command: "printf '%s' {{.SelectedFile.Name | quote}} > /tmp/nvim_diffview_target && nvim --server \"$NVIM\" --remote-expr \"v:lua.DiffviewFromLazygit()\""
+    description: 'Open file diff in Diffview (nvim)'
+    output: none
+
 gui:
   theme:
     selectedLineBgColor:
