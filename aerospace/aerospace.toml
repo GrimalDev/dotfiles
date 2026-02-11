@@ -10,7 +10,7 @@ after-startup-command = [
     "exec-and-forget /opt/homebrew/bin/skhd",
 
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Notion"',
-    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Zen"',
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Vivaldi"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "dev" "--title dev -e sesh connect \"Home 💻\"" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "btop" "--title btop -e btop" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Music"',
@@ -145,7 +145,7 @@ if.app-id = 'notion.id'
 run = ['move-node-to-workspace 2']
 
 [[on-window-detected]]
-if.app-id = 'app.zen-browser.zen'
+if.app-id = 'com.vivaldi.Vivaldi'
 run = ['move-node-to-workspace 3']
 
 [[on-window-detected]]
