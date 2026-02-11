@@ -66,44 +66,64 @@ shift + alt + cmd - l : /bin/bash -c "pmset sleepnow"
 
 alt - a [
   "zen" : skhd -k 'alt - 1'
+  "vivaldi" : skhd -k 'alt - 1'
 ]
 alt - s [
   "zen" : skhd -k 'alt - 2'
+  "vivaldi" : skhd -k 'alt - 2'
 ]
 alt - d [
   "zen" : skhd -k 'alt - 3'
+  "vivaldi" : skhd -k 'alt - 3'
 ]
 alt - f [
   "zen" : skhd -k 'alt - 4'
+  "vivaldi" : skhd -k 'alt - 4'
 ]
 alt - g [
   "zen" : skhd -k 'alt - 5'
+  "vivaldi" : skhd -k 'alt - 5'
 ]
 alt - z [
   "zen" : skhd -k 'alt - 6'
+  "vivaldi" : skhd -k 'alt - 6'
 ]
 alt - v [
   "zen" : skhd -k 'alt - 7'
+  "vivaldi" : skhd -k 'alt - 7'
 ]
 alt - x [
   "zen" : skhd -k 'alt - 8'
+  "vivaldi" : skhd -k 'alt - 8'
 ]
 alt - c [
   "zen" : skhd -k 'alt - 9'
+  "vivaldi" : skhd -k 'alt - 9'
 ]
 alt - b [
   "zen" : skhd -k 'alt - 0'
+  "vivaldi" : skhd -k 'alt - 0'
 ]
 
 shift + alt - f [
   "zen" : skhd -k 'shift + alt - !'
+  "vivaldi" : skhd -k 'shift + alt - !'
 ]
 shift + alt - d [
   "zen" : skhd -k 'shift + alt - @'
+  "vivaldi" : skhd -k 'shift + alt - @'
 ]
 shift + alt - s [
   "zen" : skhd -k 'shift + alt - #'
+  "vivaldi" : skhd -k 'shift + alt - #'
 ]
 shift + alt - a [
   "zen" : skhd -k 'shift + alt - $'
+  "vivaldi" : skhd -k 'shift + alt - $'
 ]
+
+# pointer presentation setup
+# tab : skhd -k 'alt - m'
+# pageup : osascript -e 'tell application "System Events" to tell process "Chromium" to key code 123'
+# pagedown : osascript -e 'tell application "System Events" to tell process "Chromium" to key code 124'
+
