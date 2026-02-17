@@ -174,13 +174,19 @@ if status is-interactive
     alias python="python3"
     alias pip="python3 -m pip"
 
-    # Auto-activate/deactivate python venv
+    # Auto-activate/deactivate python venv (walks up directory tree)
     function __auto_venv --on-variable PWD
-        if test -f "$PWD/.venv/bin/activate.fish"
-            if not set -q VIRTUAL_ENV; or test "$VIRTUAL_ENV" != "$PWD/.venv"
-                source "$PWD/.venv/bin/activate.fish"
+        set -l dir "$PWD"
+        while test "$dir" != ""
+            if test -f "$dir/.venv/bin/activate.fish"
+                if not set -q VIRTUAL_ENV; or test "$VIRTUAL_ENV" != "$dir/.venv"
+                    source "$dir/.venv/bin/activate.fish"
+                end
+                return
             end
-        else if set -q VIRTUAL_ENV
+            set dir (string replace -r '/[^/]*$' '' "$dir")
+        end
+        if set -q VIRTUAL_ENV
             deactivate
         end
     end
