@@ -171,6 +171,20 @@ if status is-interactive
     alias pulse="pulseaudio --load=module-native-protocol-tcp --exit-idle-time=-1 --daemon"
     alias nx-usbloader="java -jar ~/nintendo-switch/tools/ns-usbloader-7.2-m1.jar"
     alias sc="sesh connect"
+    alias python="python3"
+    alias pip="python3 -m pip"
+
+    # Auto-activate/deactivate python venv
+    function __auto_venv --on-variable PWD
+        if test -f "$PWD/.venv/bin/activate.fish"
+            if not set -q VIRTUAL_ENV; or test "$VIRTUAL_ENV" != "$PWD/.venv"
+                source "$PWD/.venv/bin/activate.fish"
+            end
+        else if set -q VIRTUAL_ENV
+            deactivate
+        end
+    end
+    __auto_venv
 
     zoxide init fish | source
     starship init fish | source
