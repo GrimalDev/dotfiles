@@ -7,6 +7,7 @@ prepend_keymap = [
 	{ on = "f", run = "plugin smart-filter", desc = "smart filter" },
 	{ on = "<c-j>", run = "arrow 1", desc = "smart filter" },
 	{ on = ["c", "m"], run = "plugin chmod", desc = "chmod on selected files" },
+	{ on = ["c", "p"], run = '''shell 'printf "%s" "$0" | pbcopy' --confirm''', desc = "copy current path to clipboard" },
 	{ on = [";", "w"], run = "cd ~/code/work/", desc = "work directory" },
 	{ on = [";", "s"], run = "cd ~/code/scolaire/", desc = "school directory" },
 	{ on = [";", "c"], run = "cd ~/.config/", desc = "config directory" },
