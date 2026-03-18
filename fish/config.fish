@@ -35,7 +35,8 @@ fish_add_path \
     "$esp_rust" \
     "/Users/grimaldev/.cache/lm-studio/bin" \
     "$HOMEBREW_PREFIX/share/google-cloud-sdk/bin" \
-    "/Users/grimaldev/.antigravity/antigravity/bin"
+    "/Users/grimaldev/.antigravity/antigravity/bin" \
+    "/opt/homebrew/Cellar/john-jumbo/1.9.0_1/share/john"
 
 set -gx M2_HOME $m2_path
 set -gx BUN_INSTALL $bun_path
@@ -104,9 +105,9 @@ function jqf
     jq 'paths | map(tostring) | join(".") | select(contains("'$search_string'"))' $file
 end
 
-function share
-    curl -F "file=@$argv" https://0x0.st | pbcopy
-end
+# function share
+#     curl -F "file=@$argv" https://0x0.st | pbcopy
+# end
 
 if test -f /etc/.env
     cat /etc/.env | while read line

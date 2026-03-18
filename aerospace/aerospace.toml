@@ -163,6 +163,10 @@ if.app-id = 'com.apple.Music'
 run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
+if.app-id = 'com.moonlight-stream.Moonlight'
+run = ['move-node-to-workspace 7']
+
+[[on-window-detected]]
 if.app-id = 'org.equicord.equibop'
 run = ['move-node-to-workspace 9']
 
@@ -202,6 +206,10 @@ run = ["layout floating"]
 
 [[on-window-detected]]
 if.app-id = "com.1password.1password"
+run = ["layout floating"]
+
+[[on-window-detected]]
+if.app-id = "com.github.liji32.sameboy"
 run = ["layout floating"]
 
 # run = ["layout floating"]
