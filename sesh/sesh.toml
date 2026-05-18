@@ -32,8 +32,8 @@ path = "~/.config/nvim/lua"
 
 [[session]]
 name = "Discord  "
-path = "~/.config/discodo"
-startup_command = "discordo -t $DISCORD_TOKEN"
+path = "~/.config/concord"
+startup_command = "concord"
 
 [[session]]
 name = "Whatsapp  "

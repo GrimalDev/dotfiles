@@ -14,7 +14,8 @@ after-startup-command = [
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "dev" "--title dev -e sesh connect \"Home 💻\"" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "btop" "--title btop -e btop" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Music"',
-    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Equibop"'
+    # 'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Equibop"'
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "discord" "--title discord -e concord" "cli"',
 ]
 
 exec-on-workspace-change = [
@@ -168,6 +169,11 @@ run = ['move-node-to-workspace 7']
 
 [[on-window-detected]]
 if.app-id = 'org.equicord.equibop'
+run = ['move-node-to-workspace 9']
+
+[[on-window-detected]]
+if.app-id = 'net.kovidgoyal.kitty'
+if.window-title-regex-substring = '^discord$'
 run = ['move-node-to-workspace 9']
 
 # -------------- FORCE TILING -------------

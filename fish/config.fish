@@ -36,7 +36,8 @@ fish_add_path \
     "/Users/grimaldev/.cache/lm-studio/bin" \
     "$HOMEBREW_PREFIX/share/google-cloud-sdk/bin" \
     "/Users/grimaldev/.antigravity/antigravity/bin" \
-    "/opt/homebrew/Cellar/john-jumbo/1.9.0_1/share/john"
+    "/opt/homebrew/Cellar/john-jumbo/1.9.0_1/share/john" \
+    "/opt/homebrew/opt/make/libexec/gnubin"
 
 set -gx M2_HOME $m2_path
 set -gx BUN_INSTALL $bun_path
@@ -173,7 +174,6 @@ if status is-interactive
     alias nx-usbloader="java -jar ~/nintendo-switch/tools/ns-usbloader-7.2-m1.jar"
     alias sc="sesh connect"
     alias python="python3"
-    alias pip="python3 -m pip"
 
     # Auto-activate/deactivate python venv (walks up directory tree)
     function __auto_venv --on-variable PWD
