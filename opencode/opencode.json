@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["oh-my-openagent@latest"],
+  "mcp": {
+    "git-master": {
+      "enabled": true
+    },
+    "mgrep": {
+      "enabled": true
+    }
+  },
+  "permission": {
+    "bash": {
+      "ssh": "deny"
+    }
+  }
+}
