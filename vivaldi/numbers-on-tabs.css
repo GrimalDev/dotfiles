@@ -1,0 +1,16 @@
+#tabs-container .tab-strip {
+  counter-reset: tab-number !important;
+}
+#tabs-container .tab-strip > span:nth-child(-n + 10) .tab-position::before {
+  counter-increment: tab-number !important;
+  content: counter(tab-number) !important;
+  position: absolute !important;
+  right: 4px !important;
+  bottom: 4px !important;
+  font-size: 10px !important;
+  color: #fff !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  padding: 1px 3px !important;
+  border-radius: 3px !important;
+  z-index: 2 !important;
+}
