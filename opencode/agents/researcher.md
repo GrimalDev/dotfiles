@@ -1,7 +1,7 @@
 ---
 description: Researcher, to ask and search the code base at low cost
 mode: primary
-model: anthropic/claude-haiku-4-5-20251001
+model: openai/claude-haiku-4-5
 temperature: 0.1
 tools:
   write: false

@@ -4,6 +4,7 @@ if test -d $HOME/.dotfiles
     set -gx DOTFILES_MIRROR "$HOME/.dotfiles"
 end
 set -gx EDITOR "nvim"
+set -gx VISUAL "nvim"
 set -gx XDEBUG_SESSION 1
 set -gx HOMEBREW_NO_AUTO_UPDATE 1
 
