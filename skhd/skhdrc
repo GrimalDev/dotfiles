@@ -1,3 +1,7 @@
+# Resets
+
+cmd - m : ''
+
 # Control actions remaps
 ctrl - j [
   "kitty" ~
@@ -127,3 +131,4 @@ shift + alt - a [
 # pageup : osascript -e 'tell application "System Events" to tell process "Chromium" to key code 123'
 # pagedown : osascript -e 'tell application "System Events" to tell process "Chromium" to key code 124'
 
+ctrl + alt + cmd - m : /opt/homebrew/bin/ical-guy meeting open --next
