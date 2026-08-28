@@ -1,10 +1,11 @@
 local colors = require("colors")
 local settings = require("settings")
 
-local function add_meeting_row(name, font_size)
+local function add_meeting_row(name, font_size, update_freq)
 	return sbar.add("item", name, {
 		position = "right",
 		width = 16,
+		update_freq = update_freq or 0,
 		label = {
 			drawing = false,
 			align = "center",
@@ -23,7 +24,7 @@ end
 local meeting_time = add_meeting_row("meeting.time", 12.0)
 local meeting_label = add_meeting_row("meeting.label", 11.0)
 local meeting_next = add_meeting_row("meeting.next", 11.0)
-local meeting_icon = add_meeting_row("meeting.icon", 22.0)
+local meeting_icon = add_meeting_row("meeting.icon", 22.0, 30)
 local meeting_card = sbar.add("bracket", "meeting.card", {
 	meeting_icon.name,
 	meeting_next.name,
@@ -56,29 +57,30 @@ meeting_time:set({
 local popup_heading = sbar.add("item", "meeting.popup.heading", {
 	position = "popup.meeting.time",
 	icon = { string = "󰃭", color = colors.yellow, width = 24, align = "center" },
-	label = { string = "NEXT MEETING", align = "left", color = colors.green, width = 196, font = { size = 10.0 } },
+	label = { string = "UPCOMING EVENTS", align = "left", color = colors.green, width = 236, font = { size = 10.0 } },
 })
-local popup_title = sbar.add("item", "meeting.popup.title", {
-	position = "popup.meeting.time",
-	icon = { drawing = false },
-	label = {
-		align = "left",
-		color = 0xffffffff,
-		width = 220,
-		font = { style = settings.font.style_map["Bold"], size = 14.0 },
-	},
-})
-local popup_time = sbar.add("item", "meeting.popup.time", {
-	position = "popup.meeting.time",
-	icon = { drawing = false },
-	label = { align = "left", color = colors.grey, width = 220, font = { size = 12.0 } },
-})
-local popup_link = sbar.add("item", "meeting.popup.link", {
-	position = "popup.meeting.time",
-	icon = { string = "󰌹", color = colors.teal, width = 24, align = "center" },
-	label = { string = "OPEN MEETING", align = "left", color = colors.teal, width = 196, font = { size = 11.0 } },
-	background = { color = colors.bg2, height = 26, corner_radius = 5 },
-})
+
+local popup_events = {}
+for index = 1, 5 do
+	local row = sbar.add("item", "meeting.popup.event." .. index, {
+		position = "popup.meeting.time",
+		icon = {
+			drawing = false,
+			width = 54,
+			align = "center",
+			font = { family = settings.font.numbers, size = 11.0 },
+		},
+		label = {
+			drawing = false,
+			align = "left",
+			color = 0xffffffff,
+			width = 206,
+			font = { family = settings.font.text, style = settings.font.style_map["Semibold"], size = 13.0 },
+		},
+		background = { drawing = false, color = colors.bg2, border_color = colors.bar.border, border_width = 1, height = 38, corner_radius = 6 },
+	})
+	table.insert(popup_events, row)
+end
 
 local white = 0xffffffff
 
@@ -143,21 +145,73 @@ local function hide_meeting()
 	meeting_time:set({ label = { drawing = false } })
 end
 
+local function hide_popup_event(row)
+	row:set({ icon = { drawing = false }, label = { drawing = false }, click_script = "" })
+end
+
+local function calendar_color(event)
+	local calendar = type(event) == "table" and event.calendar or nil
+	local hex = json_string(calendar, "color")
+	if hex:match("^#%x%x%x%x%x%x$") then
+		return tonumber("0xff" .. hex:sub(2))
+	end
+	return colors.teal
+end
+
+local function update_popup_event(row, event)
+	local title = json_string(event, "title")
+	if title == "" then
+		hide_popup_event(row)
+		return
+	end
+
+	local start = json_string(event, "startDate")
+	local link = json_string(event, "meetingUrl")
+	local click_script = link == "" and "" or "open " .. shell_quote(link)
+	event_epoch(start, function(start_epoch)
+		if not start_epoch then
+			hide_popup_event(row)
+			return
+		end
+
+		row:set({
+			icon = {
+				drawing = true,
+				string = os.date("%H:%M", start_epoch),
+				color = link == "" and calendar_color(event) or colors.teal,
+			},
+			label = { drawing = true, string = #title > 26 and title:sub(1, 25) .. "…" or title },
+			background = { drawing = true },
+			click_script = click_script,
+		})
+	end)
+end
+
+local function update_popup_events()
+	sbar.exec("ical-guy events --from now --to today+2 --exclude-all-day --group-by none --limit 5 --format json", function(result)
+		local events = type(result) == "table" and result or {}
+		for index, row in ipairs(popup_events) do
+			update_popup_event(row, events[index])
+		end
+	end)
+end
+
 local function set_popup_visible(visible)
 	meeting_time:set({ popup = { drawing = visible } })
 end
 
 local function update_meeting()
-	sbar.exec('shortcuts run "Get Nearest Event Details"', function(result)
-		local title = json_string(result, "title")
+	sbar.exec("ical-guy meeting next --format json", function(result)
+		local event = type(result) == "table" and result[1] or result
+		local title = json_string(event, "title")
 		if title == "" then
 			hide_meeting()
 			return
 		end
 
-		local start = json_string(result, "start")
-		local finish = json_string(result, "end")
-		local link = json_string(result, "link")
+		local start = json_string(event, "startDate")
+		local finish = json_string(event, "endDate")
+		local link = json_string(event, "meetingUrl")
 		event_epoch(start, function(start_epoch)
 			if not start_epoch then
 				hide_meeting()
@@ -165,22 +219,11 @@ local function update_meeting()
 			end
 
 			local click_script = link == "" and "" or "open " .. shell_quote(link)
-			popup_title:set({ label = { string = title } })
-			popup_heading:set({ click_script = click_script })
-			popup_title:set({ click_script = click_script })
-			popup_time:set({ click_script = click_script })
-			popup_link:set({ click_script = click_script })
 			meeting_icon:set({ click_script = click_script })
 			meeting_next:set({ click_script = click_script })
 			meeting_label:set({ click_script = click_script })
 			meeting_time:set({ click_script = click_script })
 			event_epoch(finish, function(finish_epoch)
-				local time_range = os.date("%a, %d %b · %H:%M", start_epoch)
-				if finish_epoch then
-					time_range = time_range .. " – " .. os.date("%H:%M", finish_epoch)
-				end
-				popup_time:set({ label = { string = time_range } })
-
 				if os.time() < start_epoch then
 				meeting_card:set({ background = { drawing = true, border_color = colors.teal } })
 				meeting_icon:set({ label = { drawing = true, string = "󰃭", color = colors.yellow } })
@@ -206,8 +249,10 @@ local function update_meeting()
 end
 
 local hover_targets = {}
-local hover_items =
-	{ meeting_icon, meeting_next, meeting_label, meeting_time, popup_heading, popup_title, popup_time, popup_link }
+local hover_items = { meeting_icon, meeting_next, meeting_label, meeting_time, popup_heading }
+for _, row in ipairs(popup_events) do
+	table.insert(hover_items, row)
+end
 
 local function has_hover_target()
 	for _, is_hovered in pairs(hover_targets) do
@@ -233,5 +278,10 @@ for _, item in ipairs(hover_items) do
 	end)
 end
 
-meeting_icon:subscribe({ "forced", "routine", "system_woke" }, update_meeting)
-update_meeting()
+local function refresh_meeting()
+	update_meeting()
+	update_popup_events()
+end
+
+meeting_icon:subscribe({ "forced", "routine", "system_woke" }, refresh_meeting)
+refresh_meeting()
