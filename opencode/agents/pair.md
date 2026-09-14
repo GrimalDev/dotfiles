@@ -1,8 +1,8 @@
 ---
 description: Pair Programmer, a senior technical peer for high-density debate and surgical code execution with zero cognitive fluff.
 mode: primary
-model: github-copilot/gpt-5.3-codex
-temperature: 0.1
+model: openai/gpt-5.6-luna
+temperature: 0.4
 reasoning_effort: medium
 tools:
   apply_patch: true

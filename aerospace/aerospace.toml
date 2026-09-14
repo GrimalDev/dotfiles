@@ -5,7 +5,7 @@ start-at-login = true
 
 # Start applications after AeroSpace startup
 after-startup-command = [
-    # "exec-and-forget /opt/homebrew/bin/borders style=round hdpi=1 width=3.0 active_color=0xffa3be8c inactive_color=0xfe3b4252",
+    "exec-and-forget /opt/homebrew/bin/borders style=round hdpi=1 width=3.0 active_color=0xffa3be8c inactive_color=0xfe3b4252",
     "exec-and-forget /opt/homebrew/bin/sketchybar",
     "exec-and-forget /opt/homebrew/bin/skhd",
 
@@ -13,6 +13,8 @@ after-startup-command = [
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Vivaldi"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "dev" "--title dev -e sesh connect \"Home 💻\"" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "btop" "--title btop -e btop" "cli"',
+    'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Mail"',
+    # 'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "slack" "--title slack -e slk" "cli"',
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Music"',
     # 'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "Equibop"'
     'exec-and-forget $HOME/.config/aerospace/scripts/start_app.sh "kitty" "discord" "--title discord -e concord" "cli"',
@@ -21,7 +23,7 @@ after-startup-command = [
 exec-on-workspace-change = [
     '/bin/bash',
     '-c',
-    '/opt/homebrew/opt/sketchybar/bin/sketchybar --trigger aerospace_workspace_change AEROSPACE_FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE AEROSPACE_PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
+    '/opt/homebrew/opt/sketchybar/bin/sketchybar --trigger aerospace_workspace_change AEROSPACE_FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE AEROSPACE_PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE; /bin/bash "$HOME/.config/aerospace/scripts/sticky-wispr.sh" "$AEROSPACE_FOCUSED_WORKSPACE"'
 ]
 
 # Normalizations
@@ -40,11 +42,11 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 # Window management preferences
 automatically-unhide-macos-hidden-apps = true
 
-# [exec]
-# inherit-env-vars = true
-#
-# [exec.env-vars]
-# PATH = '/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}'
+# AeroSpace does not run macOS's path_helper, so its exec PATH omits
+# /usr/local/bin (where cpfile lives; yazi's copy uses it). Prepend it so the
+# yazi popup and the shells it spawns can find cpfile.
+[exec.env-vars]
+PATH = '/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}'
 
 # Gaps between windows
 
@@ -64,10 +66,13 @@ preset = 'qwerty'
 [mode.main.binding]
 cmd-h = [] # Disable "hide application"
 
-# Ranger
-cmd-e = 'exec-and-forget kitty --title file -e yazi ~'
+# file manager
+cmd-e = 'exec-and-forget /bin/zsh $HOME/.config/aerospace/scripts/yazi-popup.sh'
+# cmd-e = 'exec-and-forget open -na Ghostty --args -e yazi ~'
 # -- Custom window layouts --
 cmd-r = 'exec-and-forget kitty -e bash /Users/grimaldev/.config/skhd/scripts/sesh-sessions.sh'
+
+ctrl-q = 'close'
 
 # Window focus controls (preserving your alt+cmd scheme)
 alt-cmd-h = 'focus left'
@@ -164,8 +169,21 @@ if.app-id = 'com.apple.Music'
 run = ['move-node-to-workspace 6']
 
 [[on-window-detected]]
-if.app-id = 'com.moonlight-stream.Moonlight'
+if.app-id = 'com.apple.mail'
 run = ['move-node-to-workspace 7']
+
+[[on-window-detected]]
+if.app-id = 'kitty'
+if.window-title-regex-substring = '^slack$'
+run = ['move-node-to-workspace 7']
+
+[[on-window-detected]]
+if.app-id = 'com.moonlight-stream.Moonlight'
+run = ['move-node-to-workspace 8']
+
+[[on-window-detected]]
+if.app-id = 'com.openai.codex'
+run = ['move-node-to-workspace 8']
 
 [[on-window-detected]]
 if.app-id = 'org.equicord.equibop'
@@ -174,6 +192,14 @@ run = ['move-node-to-workspace 9']
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'
 if.window-title-regex-substring = '^discord$'
+run = ['move-node-to-workspace 9']
+
+[[on-window-detected]]
+if.app-id = 'com.tinyspeck.slackmacgap'
+run = ['move-node-to-workspace 9']
+
+[[on-window-detected]]
+if.app-id = 'com.apple.MobileSMS'
 run = ['move-node-to-workspace 9']
 
 # -------------- FORCE TILING -------------
@@ -193,10 +219,16 @@ run = ['layout floating']
 # if.app-id = 'com.openai.ChatGPT'
 # run = ['layout floating']
 
+# Persistent Yazi popup. Its controller handles placement on each summon.
+[[on-window-detected]]
+if.app-id = 'net.kovidgoyal.kitty'
+if.window-title-regex-substring = '^yazi-popup$'
+run = ['layout floating']
+
 [[on-window-detected]]
 if.app-id = 'net.kovidgoyal.kitty'
 if.window-title-regex-substring = '^file$'
-run = ['layout floating']
+run = ['layout floating', 'exec-and-forget /bin/bash $HOME/.config/aerospace/scripts/center-yazi.sh']
 
 [[on-window-detected]]
 if.app-id = 'com.googlecode.iterm2'
@@ -216,6 +248,15 @@ run = ["layout floating"]
 
 [[on-window-detected]]
 if.app-id = "com.github.liji32.sameboy"
+run = ["layout floating"]
+
+[[on-window-detected]]
+if.app-id = "com.electron.wispr-flow"
+if.window-title-regex-substring = '^Status$'
+run = ["layout floating"]
+
+[[on-window-detected]]
+if.app-id = "com.mitchellh.ghostty"
 run = ["layout floating"]
 
 # run = ["layout floating"]

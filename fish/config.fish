@@ -148,18 +148,19 @@ if status is-interactive
     set -e FZF_COMPLETE 0
     set -U FZF_ENABLE_OPEN_PREVIEW 0
 
-    bind -M insert \Co '__fzf_open --editor'
+    bind -M insert \co '__fzf_open --editor'
     bind -M insert \t '__fzf_complete'
     bind -M insert \ee "nvim"
     bind -M insert \el __fish_list_current_token
     bind -M insert \ex list_run_files
     bind -M insert \er yazi
-    bind -M insert \ed "lazydocker"
+    # bind -M insert \ed "lazydocker"
+    bind -M insert \ed __fish_list_current_token
 
     alias rr='curl -s -L https://raw.githubusercontent.com/keroserene/rickrollrc/master/roll.sh | bash'
     alias immozia="cd $HOME/Desktop/oxianet/immozia"
     alias tree='exa --tree'
-    alias ls='exa -a --color=always --group-directories-first'
+    alias ls='exa -al --color=always --group-directories-first'
     alias ll='exa -alhg --color=always --group-directories-first'
     alias lt='exa -aT --color=always --group-directories-first'
     alias cat='bat'
@@ -175,6 +176,9 @@ if status is-interactive
     alias nx-usbloader="java -jar ~/nintendo-switch/tools/ns-usbloader-7.2-m1.jar"
     alias sc="sesh connect"
     alias python="python3"
+    alias ld="lazydocker"
+    alias gitrmcached='git rm --cached -r (git ls-files -i -c --exclude-from=".gitignore")'
+    alias oc='ocv --port'
 
     # Auto-activate/deactivate python venv (walks up directory tree)
     function __auto_venv --on-variable PWD
@@ -197,3 +201,6 @@ if status is-interactive
     zoxide init fish | source
     starship init fish | source
 end
+
+# OpenCode Vim
+fish_add_path "/Users/grimaldev/.ocv/bin"

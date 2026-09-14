@@ -31,7 +31,7 @@ name = "Nvim ⚙️"
 path = "~/.config/nvim/lua"
 
 [[session]]
-name = "Discord  "
+name = "Concord  "
 path = "~/.config/concord"
 startup_command = "concord"
 

@@ -16,7 +16,7 @@ if [ -z "$is_running" ]; then
 # If cli mode param provided (3rd param to cli string)
   if [ "$mode" = "cli" ]; then
     echo "Starting $app with cli mode"
-      /bin/bash -c "$app $options &"
+    fish -c "$app $options &"
   else
     echo "starting $app"
     open -a "$app"

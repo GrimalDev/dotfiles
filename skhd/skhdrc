@@ -53,7 +53,7 @@ alt - k [
 # text manipulation controls
 ctrl - w [
   "kitty" ~
-  * : skhd -k 'alt - backspace'
+  * : skhd -k 'ctrl + alt - backspace'
 ]
 
 # System control
@@ -131,4 +131,5 @@ shift + alt - a [
 # pageup : osascript -e 'tell application "System Events" to tell process "Chromium" to key code 123'
 # pagedown : osascript -e 'tell application "System Events" to tell process "Chromium" to key code 124'
 
-ctrl + alt + cmd - m : /opt/homebrew/bin/ical-guy meeting open --next
+ctrl + alt + cmd - m : /opt/homebrew/bin/ical-guy meeting open
+ctrl + alt + cmd - n : /usr/bin/open 'https://meet.new'

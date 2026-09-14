@@ -1,7 +1,7 @@
 
 [mgr]
 prepend_keymap = [
-	{ on = "l", run = "plugin smart-enter", desc = "enter the child directory, or open the file" },
+	{ on = "l", run = "plugin smart-open", desc = "enter the directory, or open the file externally and quit" },
 	{ on = "i", run = "spot", desc = "file information spotter" },
 	{ on = "m", run = "plugin mount" },
 	{ on = "f", run = "plugin smart-filter", desc = "smart filter" },
@@ -15,7 +15,7 @@ prepend_keymap = [
 	{ on = [";", "d"], run = "cd ~/downloads", desc = "downloads" },
 	{ on = [";", "p"], run = "cd ~/code/projects/", desc = "code projects" },
 	{ on = [";", "t"], run = "cd .trash/", desc = "trash folder" },
-	{ on = "y", run = ['''shell 'fish -c "copy_file \"$@\""' ''', "yank"] },
+	{ on = "y", run = ['''shell 'fish -c "cpfile \"$@\""' ''', "yank"] },
 	{ on = [";", "u"], run = "cd /volumes", desc = "mounted volumes" },
 	{ on = [";", "d"], run = "cd '/users/grimaldev/library/mobile documents/com~apple~clouddocs/documents'", desc = "icloud documents" },
 	{ on = "s", run = '''shell 'fish -c "share \"$@\""' --confirm''', desc = "share file" },

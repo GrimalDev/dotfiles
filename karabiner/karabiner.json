@@ -140,6 +140,14 @@
                             "to": [{ "key_code": "v" }]
                         }
                     ]
+                },
+                {
+                    "identifiers": {
+                        "is_pointing_device": true,
+                        "product_id": 24717,
+                        "vendor_id": 6127
+                    },
+                    "ignore": false
                 }
             ],
             "name": "Default profile",

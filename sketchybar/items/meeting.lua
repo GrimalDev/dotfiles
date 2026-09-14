@@ -137,12 +137,12 @@ local function event_epoch(timestamp, callback)
 	)
 end
 
-local function hide_meeting()
-	meeting_card:set({ background = { drawing = false } })
-	meeting_icon:set({ label = { drawing = false } })
-	meeting_next:set({ label = { drawing = false } })
-	meeting_label:set({ label = { drawing = false } })
-	meeting_time:set({ label = { drawing = false } })
+local function show_no_meetings()
+	meeting_card:set({ background = { drawing = true, border_color = colors.grey } })
+	meeting_icon:set({ label = { drawing = true, string = "󰃭", color = colors.grey }, click_script = "" })
+	meeting_next:set({ label = { drawing = true, string = "NO", color = colors.grey }, click_script = "" })
+	meeting_label:set({ label = { drawing = true, string = "MEETINGS", color = colors.grey }, click_script = "" })
+	meeting_time:set({ label = { drawing = false }, click_script = "" })
 end
 
 local function hide_popup_event(row)
@@ -205,7 +205,7 @@ local function update_meeting()
 		local event = type(result) == "table" and result[1] or result
 		local title = json_string(event, "title")
 		if title == "" then
-			hide_meeting()
+			show_no_meetings()
 			return
 		end
 
@@ -214,7 +214,7 @@ local function update_meeting()
 		local link = json_string(event, "meetingUrl")
 		event_epoch(start, function(start_epoch)
 			if not start_epoch then
-				hide_meeting()
+				show_no_meetings()
 				return
 			end
 
