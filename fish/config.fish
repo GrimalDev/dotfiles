@@ -178,7 +178,7 @@ if status is-interactive
     alias python="python3"
     alias ld="lazydocker"
     alias gitrmcached='git rm --cached -r (git ls-files -i -c --exclude-from=".gitignore")'
-    alias oc='ocv --port'
+    alias oc='opencode --port'
 
     # Auto-activate/deactivate python venv (walks up directory tree)
     function __auto_venv --on-variable PWD
