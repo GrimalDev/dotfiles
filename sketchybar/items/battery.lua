@@ -41,7 +41,6 @@ local remaining_time = sbar.add("item", {
 
 battery:subscribe({ "routine", "power_source_change", "system_woke" }, function()
 	sbar.exec("pmset -g batt", function(batt_info)
-		local icon = "!"
 		local label = "?"
 
 		local found, _, charge = batt_info:find("(%d+)%%")
@@ -53,27 +52,17 @@ battery:subscribe({ "routine", "power_source_change", "system_woke" }, function(
 		local color = colors.teal
 		local charging, _, _ = batt_info:find("AC Power")
 
+		local full_threshold = 80
+		local icon = ""
+		local drawing = false
+
 		if charging then
-			icon = icons.lightning.charging
-		else
-			if found and charge > 80 then
-				icon = icons.lightning.battery
+			drawing = true
+			if found and charge > full_threshold then
+				icon = icons.battery._100
 				color = colors.battery._100
-			elseif found and charge > 60 then
-				icon = icons.lightning.battery
-				color = colors.battery._75
-			elseif found and charge > 40 then
-				icon = icons.lightning.battery
-				color = colors.battery._50
-			elseif found and charge > 20 then
-				icon = icons.lightning.battery
-				color = colors.battery._25
-			elseif found and charge < 10 then
-				icon = icons.lightning.battery
-				color = colors.battery._10
 			else
-				icon = icons.lightning.battery
-				color = colors.battery._10
+				icon = icons.battery._0
 			end
 		end
 
@@ -81,6 +70,7 @@ battery:subscribe({ "routine", "power_source_change", "system_woke" }, function(
 			icon = {
 				string = icon,
 				color = color,
+				drawing = drawing,
 			},
 			label = { string = label },
 		})
