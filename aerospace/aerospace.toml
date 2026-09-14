@@ -173,8 +173,7 @@ if.app-id = 'com.apple.mail'
 run = ['move-node-to-workspace 7']
 
 [[on-window-detected]]
-if.app-id = 'kitty'
-if.window-title-regex-substring = '^slack$'
+if.app-id = 'dev.zed.Zed'
 run = ['move-node-to-workspace 7']
 
 [[on-window-detected]]
