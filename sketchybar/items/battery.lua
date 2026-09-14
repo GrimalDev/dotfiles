@@ -59,10 +59,10 @@ battery:subscribe({ "routine", "power_source_change", "system_woke" }, function(
 		if charging then
 			drawing = true
 			if found and charge > full_threshold then
-				icon = icons.battery._100
+				icon = icons.lightning.filled
 				color = colors.battery._100
 			else
-				icon = icons.battery._0
+				icon = icons.lightning.outline
 			end
 		end
 

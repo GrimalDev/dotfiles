@@ -11,6 +11,12 @@ local function entry(self)
 		return ya.emit("enter", { hovered = not self.open_multi })
 	end
 
+	-- yazi.nvim sets NVIM_CWD and launches yazi with --chooser-file, where
+	-- `open` hands the hovered file back to Neovim. Keep that native behavior.
+	if os.getenv("NVIM_CWD") then
+		return ya.emit("open", { hovered = not self.open_multi })
+	end
+
 	local paths = {}
 	if self.open_multi then
 		for _, u in pairs(cx.active.selected) do

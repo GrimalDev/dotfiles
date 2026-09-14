@@ -34,8 +34,8 @@ local icons = {
 			charging = "􀢋",
 		},
 		lightning = {
-			battery = "󱐌",
-			charging = "󱐋",
+			outline = "󱐌",
+			filled = "󱐋",
 		},
 		wifi = {
 			upload = "􀄨",
