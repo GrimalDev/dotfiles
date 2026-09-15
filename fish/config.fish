@@ -121,7 +121,9 @@ if test -f /etc/.env
     end
 end
 
-source $HOME/export-esp.sh
+if test -f $HOME/export-esp.sh
+    source $HOME/export-esp.sh
+end
 source ~/.orbstack/shell/init2.fish 2>/dev/null || :
 
 set nvimSessionsPath "$HOME/sessions/"
