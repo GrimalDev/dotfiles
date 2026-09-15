@@ -13,3 +13,8 @@ neovide/
 ranger/
 rofi/
 rofi.root/
+
+# tmux plugins are owned by TPM (see tmux.conf @plugin), not by this repo.
+# Untracked 2026-09-15: they were recorded as gitlinks with no .gitmodules,
+# so a fresh checkout produced empty directories.
+tmux/plugins/

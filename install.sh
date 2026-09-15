@@ -292,9 +292,9 @@ install_fish_plugins() {
     || warn "fisher update failed — run it manually inside fish"
 }
 
-# tmux/plugins/* are gitlinks (mode 160000) with no .gitmodules, so a fresh
-# checkout leaves them empty. Bootstrap tpm, then let it install the plugins
-# declared in tmux.conf.
+# tmux/plugins/ is git-ignored and owned by TPM (see tmux.conf @plugin lines),
+# so a fresh checkout has no plugins at all. Bootstrap tpm, then let it install
+# everything tmux.conf declares.
 install_tmux_plugins() {
   local dir="$CONFIG_DIR/tmux/plugins"
   [ -d "$CONFIG_DIR/tmux" ] || return 0
