@@ -19,6 +19,7 @@ rofi.root/
 # so a fresh checkout produced empty directories.
 tmux/plugins/
 
-# Secret (Raycast access token) and machine-local agent state — never tracked.
-raycast/config.json
+# Raycast runtime secrets/state (token, local endpoint token, extensions).
+# Never tracked.
+raycast/
 .omo/
