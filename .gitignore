@@ -4,3 +4,12 @@ gh/
 github-copilot/
 nvim/
 wireshark/
+
+# Unused app configs — untracked 2026-09-15, still present on disk.
+Autodesk/
+asciinema/
+flutter/
+neovide/
+ranger/
+rofi/
+rofi.root/
