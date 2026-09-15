@@ -42,6 +42,8 @@ DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"          # bare git dir
 CONFIG_DIR="${DOTFILES_WORKTREE:-$HOME/.config}"         # work tree
 BACKUP_ROOT="${DOTFILES_BACKUP_ROOT:-$HOME/.dotfiles-backup}"
 CLT_TIMEOUT="${DOTFILES_CLT_TIMEOUT:-1800}"
+NVIM_CONFIG_REPO="${DOTFILES_NVIM_REPO:-https://github.com/GrimalDev/nvim-config}"
+NVIM_STARTER_REPO="${DOTFILES_NVIM_STARTER_REPO:-https://github.com/NvChad/starter}"
 
 # Third-party taps Homebrew refuses to load until explicitly trusted.
 TRUSTED_TAPS="felixkratz/formulae joshmedeski/sesh nikitabobko/tap"
@@ -53,6 +55,7 @@ SKIP_POST=0
 START_SERVICES=1
 EXA_SHIM=1
 INSTALL_ROSETTA=1
+REPLACE_NVIM=0
 DRY_RUN=0
 
 # ---------------------------------------------------------------------------
@@ -104,6 +107,9 @@ From an existing checkout:
 Installed automatically when missing:
   Xcode Command Line Tools, Homebrew, Rosetta 2 (Apple Silicon only).
 
+Also configured:
+  ~/.config/nvim from NvChad/starter + github.com/GrimalDev/nvim-config.
+
 Options:
   -b, --branch <name>   Branch to check out          (default: aerospace)
       --repo <url>      Override remote URL
@@ -113,6 +119,7 @@ Options:
       --no-services     Do not start brew services
       --no-shim         Do not create the exa->eza compatibility shim
       --no-rosetta      Do not install Rosetta 2
+      --replace-nvim    Rebuild ~/.config/nvim from the nvim-config repo
       --clt-timeout <s> Seconds to wait for Command Line Tools (default 1800)
   -n, --dry-run         Print actions, change nothing
   -h, --help            This help
@@ -132,6 +139,7 @@ parse_args() {
       --no-services)    START_SERVICES=0; shift ;;
       --no-shim)        EXA_SHIM=0; shift ;;
       --no-rosetta)     INSTALL_ROSETTA=0; shift ;;
+      --replace-nvim)   REPLACE_NVIM=1; shift ;;
       --clt-timeout)    CLT_TIMEOUT="${2:-}"; shift 2 ;;
       -n|--dry-run)     DRY_RUN=1; shift ;;
       -h|--help)        usage; exit 0 ;;
@@ -416,6 +424,52 @@ $(sed -n "s/^[[:space:]]*set[[:space:]].*@plugin[[:space:]]*['\"]\([^'\"]*\)['\"
 EOF
 }
 
+install_neovim_config() {
+  local dir="$CONFIG_DIR/nvim"
+
+  command -v nvim >/dev/null 2>&1 \
+    || { warn "neovim not installed — skipping nvim config"; return 0; }
+
+  log "Neovim config (NvChad starter + nvim-config)"
+
+  if [ -n "$(ls -A "$dir" 2>/dev/null)" ] && [ "$REPLACE_NVIM" != 1 ]; then
+    step "already present — leaving alone (--replace-nvim to rebuild)"
+    return 0
+  fi
+
+  if [ "$DRY_RUN" = 1 ]; then
+    printf '%s  [dry-run] clone %s -> %s; replace lua/ with %s; mv lua/main-init.lua init.lua; nvim --headless "+Lazy! sync"%s\n' \
+      "$C_DIM" "$NVIM_STARTER_REPO" "$dir" "$NVIM_CONFIG_REPO" "$C_RESET"
+    return 0
+  fi
+
+  if [ -n "$(ls -A "$dir" 2>/dev/null)" ]; then
+    local backup
+    backup="$BACKUP_ROOT/nvim-$(date +%Y%m%d-%H%M%S)"
+    step "backing up existing config -> $backup"
+    mkdir -p "$BACKUP_ROOT"
+    mv "$dir" "$backup"
+  fi
+
+  rm -rf "$dir"
+  step "cloning NvChad starter"
+  git clone "$NVIM_STARTER_REPO" "$dir" || { warn "starter clone failed"; return 0; }
+
+  rm -rf "$dir/lua"
+  mkdir -p "$dir/lua"
+  step "cloning nvim-config into lua/"
+  git clone "$NVIM_CONFIG_REPO" "$dir/lua" || { warn "nvim-config clone failed"; return 0; }
+
+  if [ -f "$dir/lua/main-init.lua" ]; then
+    step "lua/main-init.lua -> init.lua"
+    mv "$dir/lua/main-init.lua" "$dir/init.lua"
+  fi
+
+  step "installing plugins (headless Lazy sync)"
+  nvim --headless "+Lazy! sync" +qa \
+    || warn "plugin sync did not finish — open nvim and run :Lazy sync"
+}
+
 install_sketchybar() {
   [ -d "$CONFIG_DIR/sketchybar" ] || return 0
   log "sketchybar"
@@ -477,6 +531,7 @@ post_install() {
   set_default_shell
   install_fish_plugins
   install_tmux_plugins
+  install_neovim_config
   install_sketchybar
   install_exa_shim
   start_services
