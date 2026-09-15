@@ -10,7 +10,6 @@
     }
   },
   "permission": {
-    "edit": "ask",
-    "bash": "ask"
+    "edit": "ask"
   }
 }

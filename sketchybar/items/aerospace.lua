@@ -41,6 +41,12 @@ local function get_workspace_icon(workspace_name)
 	return workspace_icons[name] or "󰆮"
 end
 
+local function is_numbered_workspace(workspace_name)
+	local name = workspace_name:match("[^/]+$") or workspace_name
+	local n = tonumber(name)
+	return n ~= nil and n >= 1 and n <= 10 and name:match("^%d+$") ~= nil
+end
+
 sbar.exec("aerospace list-workspaces --all --format '%{workspace}%{monitor-id}' --json", function(spaces_json)
 	local spaces = parse_workspace_json(spaces_json)
 
@@ -62,71 +68,73 @@ sbar.exec("aerospace list-workspaces --all --format '%{workspace}%{monitor-id}' 
 
 		for monitor_id, monitor_spaces in pairs(monitors) do
 			for _, space_name in ipairs(monitor_spaces) do
-				local space = sbar.add("item", "space." .. space_name, {
-					icon = {
-						drawing = false,
-					},
-					label = {
-						drawing = true,
-						string = space_name:match("[^/]+$") or space_name,
-						color = visible_set[space_name] and colors.black or colors.white,
-						font = {
-							style = settings.font.style_map["SemiBold"],
-							size = 12.0,
+				if is_numbered_workspace(space_name) then
+					local space = sbar.add("item", "space." .. space_name, {
+						icon = {
+							drawing = false,
 						},
-						padding_right = 10,
-						padding_left = 10,
-					},
-					padding_right = 0,
-					padding_left = 0,
-					background = {
-						color = visible_set[space_name] and colors.spaces.active or colors.bg1,
-						border_width = 0,
-						height = 26,
-					},
-					associated_display = monitor_id,
-				})
-
-				local space_bracket = sbar.add("bracket", { space.name }, {
-					background = {
-						color = colors.transparent,
-						border_color = colors.bg2,
-						height = 28,
-						border_width = 0,
-					},
-				})
-
-				-- Padding space
-				local space_padding = sbar.add("item", "space.padding." .. space_name, {
-					script = "",
-					width = settings.aerospace_padding,
-					associated_display = monitor_id,
-				})
-
-				space:subscribe("aerospace_workspace_change", function(env)
-					-- Get current visible workspaces after change
-					sbar.exec("aerospace list-workspaces --monitor all --visible", function(visible_workspaces)
-						local visible_set = {}
-						for workspace in visible_workspaces:gmatch("[^\r\n]+") do
-							visible_set[workspace] = true
-						end
-
-						space:set({
-							icon = { color = colors.white },
-							label = {
-								drawing = true,
-								color = visible_set[space_name] and colors.black or colors.white,
+						label = {
+							drawing = true,
+							string = space_name:match("[^/]+$") or space_name,
+							color = visible_set[space_name] and colors.black or colors.white,
+							font = {
+								style = settings.font.style_map["SemiBold"],
+								size = 12.0,
 							},
-							background = { color = visible_set[space_name] and colors.spaces.active or colors.bg1 },
-						})
+							padding_right = 10,
+							padding_left = 10,
+						},
+						padding_right = 0,
+						padding_left = 0,
+						background = {
+							color = visible_set[space_name] and colors.spaces.active or colors.bg1,
+							border_width = 0,
+							height = 26,
+						},
+						associated_display = monitor_id,
+					})
+
+					local space_bracket = sbar.add("bracket", { space.name }, {
+						background = {
+							color = colors.transparent,
+							border_color = colors.bg2,
+							height = 28,
+							border_width = 0,
+						},
+					})
+
+					-- Padding space
+					local space_padding = sbar.add("item", "space.padding." .. space_name, {
+						script = "",
+						width = settings.aerospace_padding,
+						associated_display = monitor_id,
+					})
+
+					space:subscribe("aerospace_workspace_change", function(env)
+						-- Get current visible workspaces after change
+						sbar.exec("aerospace list-workspaces --monitor all --visible", function(visible_workspaces)
+							local visible_set = {}
+							for workspace in visible_workspaces:gmatch("[^\r\n]+") do
+								visible_set[workspace] = true
+							end
+
+							space:set({
+								icon = { color = colors.white },
+								label = {
+									drawing = true,
+									color = visible_set[space_name] and colors.black or colors.white,
+								},
+								background = { color = visible_set[space_name] and colors.spaces.active or colors.bg1 },
+							})
+						end)
 					end)
-				end)
 
-				space:subscribe("mouse.clicked", function()
-					sbar.exec("aerospace workspace " .. space_name)
-				end)
+					space:subscribe("mouse.clicked", function()
+						sbar.exec("aerospace workspace " .. space_name)
+					end)
 
-				item_order = item_order .. " " .. space.name .. " " .. space_padding.name
+					item_order = item_order .. " " .. space.name .. " " .. space_padding.name
+				end
 			end
 		end
 		if item_order ~= "" then
