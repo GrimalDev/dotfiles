@@ -70,7 +70,7 @@ cask "aerospace"
 cask "karabiner-elements"
 cask "raycast"
 cask "1password-cli"                   # op/config
-# cask "vivaldi"                       # tracked on this branch; uncomment to install
+cask "vivaldi"                         # vivaldi/ custom CSS is tracked in this repo
 
 # --- legacy window management (replaced by aerospace; commented) ------------
 # Requires: brew tap koekeishiya/formulae
