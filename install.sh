@@ -293,24 +293,39 @@ install_fish_plugins() {
 }
 
 # tmux/plugins/ is git-ignored and owned by TPM (see tmux.conf @plugin lines),
-# so a fresh checkout has no plugins at all. Bootstrap tpm, then let it install
-# everything tmux.conf declares.
+# so a fresh checkout has no plugins at all.
+#
+# TPM's CLI resolves its plugin directory from a tmux-server global
+# (TMUX_PLUGIN_MANAGER_PATH), which only exists once tmux has sourced the
+# config — i.e. never on a brand-new machine. So install deterministically
+# from the @plugin lines here; TPM then finds everything already in place.
 install_tmux_plugins() {
+  local conf="$CONFIG_DIR/tmux/tmux.conf"
   local dir="$CONFIG_DIR/tmux/plugins"
-  [ -d "$CONFIG_DIR/tmux" ] || return 0
+  [ -f "$conf" ] || return 0
 
   log "tmux plugins"
+
   if [ ! -e "$dir/tpm/bin/install_plugins" ]; then
-    step "tpm missing — cloning"
-    run git clone --depth 1 https://github.com/tmux-plugins/tpm "$dir/tpm"
+    step "cloning tpm"
+    run git clone https://github.com/tmux-plugins/tpm "$dir/tpm"
   fi
-  if [ "$DRY_RUN" = 1 ]; then
-    printf '%s  [dry-run] tpm install_plugins%s\n' "$C_DIM" "$C_RESET"
-    return 0
-  fi
-  if [ -x "$dir/tpm/bin/install_plugins" ]; then
-    "$dir/tpm/bin/install_plugins" || warn "tmux plugins incomplete — run prefix+I inside tmux"
-  fi
+
+  local spec name
+  while IFS= read -r spec; do
+    [ -n "$spec" ] || continue
+    name="${spec##*/}"
+    name="${name%.git}"
+    if [ -e "$dir/$name" ]; then
+      step "$name: present"
+    else
+      step "cloning $name"
+      run git clone "https://github.com/$spec" "$dir/$name" \
+        || warn "could not clone $name — run prefix+I inside tmux instead"
+    fi
+  done <<EOF
+$(sed -n "s/^[[:space:]]*set[[:space:]].*@plugin[[:space:]]*['\"]\([^'\"]*\)['\"].*/\1/p" "$conf")
+EOF
 }
 
 install_sketchybar() {
