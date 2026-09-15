@@ -219,11 +219,41 @@ ensure_rosetta() {
     || warn "Rosetta not installed (native tools do not need it)"
 }
 
+check_toolchain() {
+  command -v clang >/dev/null 2>&1 || return 0
+
+  local tmp
+  tmp="$(mktemp -d)"
+  if printf 'int main(void){return 0;}\n' | clang -x c - -o "$tmp/probe" >"$tmp/log" 2>&1; then
+    step "clang builds and links"
+    rm -rf "$tmp"
+    return 0
+  fi
+
+  warn "clang cannot build and link a trivial program"
+  if grep -qE 'tapi error|malformed file|unknown architecture' "$tmp/log" 2>/dev/null; then
+    warn "the toolchain does not match the SDK it targets"
+    warn "clang:        $(clang -v 2>&1 | sed -n 's/^InstalledDir: //p')"
+    warn "xcode-select: $(xcode-select -p 2>/dev/null)"
+    case "$(xcode-select -p 2>/dev/null)" in
+      /Applications/Xcode*.app/*)
+        warn "align them:   sudo xcode-select -switch /Library/Developer/CommandLineTools" ;;
+      *)
+        warn "reinstall:    sudo rm -rf /Library/Developer/CommandLineTools && xcode-select --install" ;;
+    esac
+    warn "sketchybar helpers and SbarLua cannot build until this is fixed"
+  else
+    tail -3 "$tmp/log" | sed 's/^/    /'
+  fi
+  rm -rf "$tmp"
+}
+
 install_bases() {
   log "Base prerequisites"
   ensure_clt
   command -v git >/dev/null 2>&1 || die "git still missing after the Command Line Tools install"
   step "git: $(git --version)"
+  check_toolchain
   ensure_rosetta
 }
 
