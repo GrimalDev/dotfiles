@@ -496,21 +496,37 @@ install_sketchybar() {
     step "app font already installed"
   fi
 
-  # SbarLua powers the Lua config (sketchybarrc is `#!/usr/bin/env lua`).
-  if command -v lua >/dev/null 2>&1 && ! lua -e 'require("sbar")' >/dev/null 2>&1; then
-    step "installing SbarLua"
-    if [ "$DRY_RUN" = 1 ]; then
-      printf '%s  [dry-run] clone+make install FelixKratz/SbarLua%s\n' "$C_DIM" "$C_RESET"
-    else
-      local tmp
-      tmp="$(mktemp -d)"
-      if git clone --depth 1 https://github.com/FelixKratz/SbarLua "$tmp/SbarLua"; then
-        ( cd "$tmp/SbarLua" && make install ) || warn "SbarLua build failed — see sketchybar/helpers/install.sh"
-      fi
-      rm -rf "$tmp"
-    fi
+  local sbar_so="$HOME/.local/share/sketchybar_lua/sketchybar.so"
+  if [ -f "$sbar_so" ]; then
+    step "SbarLua already installed"
+  elif [ "$DRY_RUN" = 1 ]; then
+    printf '%s  [dry-run] build SbarLua -> %s%s\n' "$C_DIM" "$sbar_so" "$C_RESET"
   else
-    step "SbarLua already available"
+    step "installing SbarLua"
+    local tmp log lua_dir
+    tmp="$(mktemp -d)"
+    log="$tmp/build.log"
+    if git clone --depth 1 https://github.com/FelixKratz/SbarLua "$tmp/SbarLua" >"$log" 2>&1; then
+      lua_dir="$(sed -n 's/^LUA_DIR=//p' "$tmp/SbarLua/Makefile")"
+      mkdir -p "$tmp/SbarLua/bin"
+      # Build only the static lib: upstream's target also builds the bundled
+      # `lua` interpreter, which links -lreadline and fails on SDKs whose
+      # .tbd files the linker rejects.
+      if ( cd "$tmp/SbarLua/$lua_dir/src" && make liblua.a ) >>"$log" 2>&1 \
+        && cp "$tmp/SbarLua/$lua_dir/src/liblua.a" "$tmp/SbarLua/bin/liblua.a" \
+        && ( cd "$tmp/SbarLua" && make install ) >>"$log" 2>&1; then
+        step "installed -> $sbar_so"
+      else
+        warn "SbarLua build failed"
+        if grep -qE 'tapi error|malformed file|unknown architecture' "$log" 2>/dev/null; then
+          warn "the Command Line Tools SDK looks inconsistent — try: sudo xcode-select --reset"
+        fi
+        tail -4 "$log" 2>/dev/null | sed 's/^/    /'
+      fi
+    else
+      warn "could not clone SbarLua"
+    fi
+    rm -rf "$tmp"
   fi
 }
 
