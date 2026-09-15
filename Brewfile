@@ -69,6 +69,7 @@ cask "font-sf-pro"                     # sketchybar text    (helpers/default_fon
 cask "aerospace"
 cask "karabiner-elements"
 cask "raycast"
+cask "1password"                       # desktop app
 cask "1password-cli"                   # op/config
 cask "vivaldi"                         # vivaldi/ custom CSS is tracked in this repo
 
