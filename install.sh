@@ -114,7 +114,7 @@ Installed automatically when missing:
 Also configured:
   ~/.config/nvim from NvChad/starter + github.com/GrimalDev/nvim-config.
   Desktop picture from ~/.config/wallpapers/ (via desktoppr or osascript).
-  Vivaldi shortcuts, toolbar placements and CSS-mod dir (vivaldi/vivaldi-settings.json).
+  All Vivaldi settings incl. keyboard shortcuts (vivaldi/vivaldi-settings.json).
 
 Options:
   -b, --branch <name>   Branch to check out          (default: aerospace)
@@ -613,10 +613,7 @@ install_vivaldi_settings() {
   fi
 
   local filter tmp
-  filter=".vivaldi.actions = \$s[0].vivaldi.actions
-    | .vivaldi.toolbars = \$s[0].vivaldi.toolbars
-    | .vivaldi.menu = \$s[0].vivaldi.menu
-    | .vivaldi.appearance = (((.vivaldi.appearance // {}) * (\$s[0].vivaldi.appearance // {})) | .css_ui_mods_directory = \$d)"
+  filter=".vivaldi = (((.vivaldi // {}) * (\$s[0].vivaldi // {})) | .appearance.css_ui_mods_directory = \$d)"
 
   tmp="$(mktemp)"
   if [ -f "$dest" ]; then
