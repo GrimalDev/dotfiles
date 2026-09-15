@@ -31,6 +31,9 @@ brew "grc"                  # fish alias `tail` -> grc
 brew "jq"                   # fish `brew` function pipes formulae API through jq
 brew "make"                 # sketchybar/helpers build
 
+# --- editor -----------------------------------------------------------------
+brew "neovim"               # EDITOR/VISUAL + `ee` binding in fish/config.fish
+
 # --- terminal / multiplexer / file manager ----------------------------------
 brew "tmux"
 brew "yazi"                 # config + vendored plugins are tracked
