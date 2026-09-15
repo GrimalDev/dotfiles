@@ -45,6 +45,7 @@ CLT_TIMEOUT="${DOTFILES_CLT_TIMEOUT:-1800}"
 NVIM_CONFIG_REPO="${DOTFILES_NVIM_REPO:-https://github.com/GrimalDev/nvim-config}"
 NVIM_STARTER_REPO="${DOTFILES_NVIM_STARTER_REPO:-https://github.com/NvChad/starter}"
 WALLPAPER="${DOTFILES_WALLPAPER:-}"
+VIVALDI_PREFS="${DOTFILES_VIVALDI_PREFS:-$HOME/Library/Application Support/Vivaldi/Default/Preferences}"
 
 # Third-party taps Homebrew refuses to load until explicitly trusted.
 TRUSTED_TAPS="felixkratz/formulae joshmedeski/sesh nikitabobko/tap"
@@ -58,6 +59,7 @@ EXA_SHIM=1
 INSTALL_ROSETTA=1
 REPLACE_NVIM=0
 SET_WALLPAPER=1
+SET_VIVALDI=1
 DRY_RUN=0
 
 # ---------------------------------------------------------------------------
@@ -112,6 +114,7 @@ Installed automatically when missing:
 Also configured:
   ~/.config/nvim from NvChad/starter + github.com/GrimalDev/nvim-config.
   Desktop picture from ~/.config/wallpapers/ (via desktoppr or osascript).
+  Vivaldi shortcuts, toolbar placements and CSS-mod dir (vivaldi/vivaldi-settings.json).
 
 Options:
   -b, --branch <name>   Branch to check out          (default: aerospace)
@@ -124,6 +127,7 @@ Options:
       --no-rosetta      Do not install Rosetta 2
       --replace-nvim    Rebuild ~/.config/nvim from the nvim-config repo
       --no-wallpaper    Do not set the desktop picture from wallpapers/
+      --no-vivaldi      Do not deploy vivaldi/Preferences to the Vivaldi profile
       --clt-timeout <s> Seconds to wait for Command Line Tools (default 1800)
   -n, --dry-run         Print actions, change nothing
   -h, --help            This help
@@ -145,6 +149,7 @@ parse_args() {
       --no-rosetta)     INSTALL_ROSETTA=0; shift ;;
       --replace-nvim)   REPLACE_NVIM=1; shift ;;
       --no-wallpaper)   SET_WALLPAPER=0; shift ;;
+      --no-vivaldi)     SET_VIVALDI=0; shift ;;
       --clt-timeout)    CLT_TIMEOUT="${2:-}"; shift 2 ;;
       -n|--dry-run)     DRY_RUN=1; shift ;;
       -h|--help)        usage; exit 0 ;;
@@ -553,6 +558,69 @@ install_wallpaper() {
   fi
 }
 
+install_vivaldi_settings() {
+  [ "$SET_VIVALDI" = 1 ] || return 0
+
+  local src="$CONFIG_DIR/vivaldi/vivaldi-settings.json"
+  [ -f "$src" ] || return 0
+
+  local dest="$VIVALDI_PREFS"
+  log "Vivaldi settings"
+  step "profile: $dest"
+
+  if ! command -v jq >/dev/null 2>&1; then
+    warn "jq not installed — cannot merge Vivaldi settings"
+    return 0
+  fi
+
+  if [ "$DRY_RUN" = 1 ]; then
+    printf '%s  [dry-run] merge vivaldi-settings.json into %s%s\n' "$C_DIM" "$dest" "$C_RESET"
+    return 0
+  fi
+
+  local filter tmp
+  filter=".vivaldi.actions = \$s[0].vivaldi.actions
+    | .vivaldi.toolbars = \$s[0].vivaldi.toolbars
+    | .vivaldi.menu = \$s[0].vivaldi.menu
+    | .vivaldi.appearance = (((.vivaldi.appearance // {}) * (\$s[0].vivaldi.appearance // {})) | .css_ui_mods_directory = \$d)"
+
+  tmp="$(mktemp)"
+  if [ -f "$dest" ]; then
+    jq -c --slurpfile s "$src" --arg d "$CONFIG_DIR/vivaldi" "$filter" "$dest" > "$tmp" 2>/dev/null \
+      || { warn "could not parse $dest — leaving Vivaldi settings alone"; rm -f "$tmp"; return 0; }
+  else
+    printf '{}\n' | jq -c --slurpfile s "$src" --arg d "$CONFIG_DIR/vivaldi" "$filter" > "$tmp" 2>/dev/null \
+      || { warn "could not build Vivaldi settings"; rm -f "$tmp"; return 0; }
+  fi
+
+  if [ -f "$dest" ] && cmp -s <(jq -cS . "$tmp" 2>/dev/null) <(jq -cS . "$dest" 2>/dev/null); then
+    step "already up to date"
+    rm -f "$tmp"
+    return 0
+  fi
+
+  if pgrep -x Vivaldi >/dev/null 2>&1; then
+    warn "Vivaldi is running — skipping; it rewrites Preferences on quit. Quit Vivaldi and re-run."
+    rm -f "$tmp"
+    return 0
+  fi
+
+  if [ -f "$dest" ]; then
+    local backup
+    backup="$dest.backup-$(date +%Y%m%d-%H%M%S)"
+    step "backing up existing Preferences -> $backup"
+    cp "$dest" "$backup"
+  fi
+
+  mkdir -p "$(dirname "$dest")"
+  if cp "$tmp" "$dest"; then
+    step "applied (shortcuts, placements, menu, css mods dir)"
+  else
+    warn "could not write Vivaldi Preferences"
+  fi
+  rm -f "$tmp"
+}
+
 # fish aliases `ls|ll|lt` to `exa`, which Homebrew no longer ships. Link eza.
 install_exa_shim() {
   [ "$EXA_SHIM" = 1 ] || return 0
@@ -583,6 +651,7 @@ post_install() {
   install_neovim_config
   install_sketchybar
   install_wallpaper
+  install_vivaldi_settings
   install_exa_shim
   start_services
 }
