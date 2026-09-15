@@ -12,9 +12,9 @@
 #
 # Usage
 #   One line, always the latest revision of the default branch:
-#     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/GrimalDev/dotfiles/HEAD/install.sh)"
+#     /bin/bash -c "$(curl -fsSL https://github.com/GrimalDev/dotfiles/raw/HEAD/install.sh)"
 #   Same, passing options through stdin:
-#     curl -fsSL https://raw.githubusercontent.com/GrimalDev/dotfiles/HEAD/install.sh | bash -s -- --dry-run
+#     curl -fsSL https://github.com/GrimalDev/dotfiles/raw/HEAD/install.sh | bash -s -- --dry-run
 #   From an existing checkout:
 #     ~/.config/install.sh
 #   Options:
@@ -93,10 +93,10 @@ This repo is a bare repository whose work-tree is ~/.config:
 That command is aliased to `dots` in fish/config.fish.
 
 Latest, one line (default branch):
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/GrimalDev/dotfiles/HEAD/install.sh)"
+    /bin/bash -c "$(curl -fsSL https://github.com/GrimalDev/dotfiles/raw/HEAD/install.sh)"
 
 Same, passing options through stdin:
-    curl -fsSL https://raw.githubusercontent.com/GrimalDev/dotfiles/HEAD/install.sh | bash -s -- --dry-run
+    curl -fsSL https://github.com/GrimalDev/dotfiles/raw/HEAD/install.sh | bash -s -- --dry-run
 
 From an existing checkout:
     ~/.config/install.sh
