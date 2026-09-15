@@ -72,6 +72,7 @@ cask "raycast"
 cask "1password"                       # desktop app
 cask "1password-cli"                   # op/config
 cask "vivaldi"                         # vivaldi/ custom CSS is tracked in this repo
+cask "wispr-flow"                      # aerospace/scripts/sticky-wispr.sh drives its HUD
 
 # --- legacy window management (replaced by aerospace; commented) ------------
 # Requires: brew tap koekeishiya/formulae
