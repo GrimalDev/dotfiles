@@ -293,7 +293,8 @@ clone_repo() {
   if [ -d "$DOTFILES_DIR" ]; then
     FRESH_CLONE=0
     step "bare repo exists — fetching"
-    run dots_git fetch --prune origin
+    run dots_git fetch --prune origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" \
+      || warn "could not fetch $BRANCH from origin"
   else
     FRESH_CLONE=1
     step "cloning bare repo -> $DOTFILES_DIR"
@@ -341,7 +342,19 @@ backup_conflicts() {
 # ---------------------------------------------------------------------------
 checkout_branch() {
   log "Checkout"
-  run dots_git checkout -f "$BRANCH"
+
+  if dots_git rev-parse --verify --quiet "origin/$BRANCH" >/dev/null 2>&1; then
+    local ahead=0
+    ahead="$(dots_git rev-list --count "origin/$BRANCH..$BRANCH" 2>/dev/null || echo 0)"
+    if [ "$ahead" -gt 0 ] 2>/dev/null; then
+      warn "local $BRANCH is $ahead commit(s) ahead of origin — resetting to origin/$BRANCH"
+    fi
+    run dots_git checkout -f -B "$BRANCH" "origin/$BRANCH"
+  else
+    warn "origin/$BRANCH not found — using the local $BRANCH"
+    run dots_git checkout -f "$BRANCH"
+  fi
+
   dots_git branch --set-upstream-to="origin/$BRANCH" "$BRANCH" >/dev/null 2>&1 || true
   if [ "$DRY_RUN" = 0 ]; then
     step "HEAD: $(dots_git rev-parse --short HEAD) on $BRANCH"
@@ -519,7 +532,12 @@ install_sketchybar() {
       else
         warn "SbarLua build failed"
         if grep -qE 'tapi error|malformed file|unknown architecture' "$log" 2>/dev/null; then
-          warn "the Command Line Tools SDK looks inconsistent — try: sudo xcode-select --reset"
+          warn "the Command Line Tools SDK cannot be parsed by the linker"
+          if [ -d /Applications/Xcode.app ]; then
+            warn "use Xcode: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer"
+          else
+            warn "reinstall: sudo rm -rf /Library/Developer/CommandLineTools && xcode-select --install"
+          fi
         fi
         tail -4 "$log" 2>/dev/null | sed 's/^/    /'
       fi
