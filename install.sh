@@ -44,6 +44,7 @@ BACKUP_ROOT="${DOTFILES_BACKUP_ROOT:-$HOME/.dotfiles-backup}"
 CLT_TIMEOUT="${DOTFILES_CLT_TIMEOUT:-1800}"
 NVIM_CONFIG_REPO="${DOTFILES_NVIM_REPO:-https://github.com/GrimalDev/nvim-config}"
 NVIM_STARTER_REPO="${DOTFILES_NVIM_STARTER_REPO:-https://github.com/NvChad/starter}"
+WALLPAPER="${DOTFILES_WALLPAPER:-}"
 
 # Third-party taps Homebrew refuses to load until explicitly trusted.
 TRUSTED_TAPS="felixkratz/formulae joshmedeski/sesh nikitabobko/tap"
@@ -56,6 +57,7 @@ START_SERVICES=1
 EXA_SHIM=1
 INSTALL_ROSETTA=1
 REPLACE_NVIM=0
+SET_WALLPAPER=1
 DRY_RUN=0
 
 # ---------------------------------------------------------------------------
@@ -109,6 +111,7 @@ Installed automatically when missing:
 
 Also configured:
   ~/.config/nvim from NvChad/starter + github.com/GrimalDev/nvim-config.
+  Desktop picture from ~/.config/wallpapers/ (via desktoppr or osascript).
 
 Options:
   -b, --branch <name>   Branch to check out          (default: aerospace)
@@ -120,6 +123,7 @@ Options:
       --no-shim         Do not create the exa->eza compatibility shim
       --no-rosetta      Do not install Rosetta 2
       --replace-nvim    Rebuild ~/.config/nvim from the nvim-config repo
+      --no-wallpaper    Do not set the desktop picture from wallpapers/
       --clt-timeout <s> Seconds to wait for Command Line Tools (default 1800)
   -n, --dry-run         Print actions, change nothing
   -h, --help            This help
@@ -140,6 +144,7 @@ parse_args() {
       --no-shim)        EXA_SHIM=0; shift ;;
       --no-rosetta)     INSTALL_ROSETTA=0; shift ;;
       --replace-nvim)   REPLACE_NVIM=1; shift ;;
+      --no-wallpaper)   SET_WALLPAPER=0; shift ;;
       --clt-timeout)    CLT_TIMEOUT="${2:-}"; shift 2 ;;
       -n|--dry-run)     DRY_RUN=1; shift ;;
       -h|--help)        usage; exit 0 ;;
@@ -504,6 +509,50 @@ install_sketchybar() {
   fi
 }
 
+install_wallpaper() {
+  [ "$SET_WALLPAPER" = 1 ] || return 0
+
+  local dir="$CONFIG_DIR/wallpapers"
+  [ -d "$dir" ] || return 0
+
+  local image="$WALLPAPER" f
+  if [ -z "$image" ]; then
+    for f in "$dir"/*.jpg "$dir"/*.jpeg "$dir"/*.png "$dir"/*.heic; do
+      if [ -f "$f" ]; then image="$f"; break; fi
+    done
+  fi
+
+  log "Wallpaper"
+  if [ -z "$image" ]; then
+    warn "no image found in $dir"
+    return 0
+  fi
+  if [ ! -f "$image" ]; then
+    warn "wallpaper not found: $image"
+    return 0
+  fi
+
+  step "image: $image"
+
+  if [ "$DRY_RUN" = 1 ]; then
+    printf '%s  [dry-run] set desktop picture -> %s%s\n' "$C_DIM" "$image" "$C_RESET"
+    return 0
+  fi
+
+  if command -v desktoppr >/dev/null 2>&1 && desktoppr "$image"; then
+    step "applied to all displays (desktoppr)"
+    return 0
+  fi
+
+  local jxa
+  jxa="ObjC.import('AppKit'); var ws=\$.NSWorkspace.sharedWorkspace, u=\$.NSURL.fileURLWithPath('$image'); \$.NSScreen.screens.js.forEach(function(s){ ws.setDesktopImageURLForScreenOptionsError(u, s, \$(), \$()); });"
+  if osascript -l JavaScript -e "$jxa" >/dev/null 2>&1; then
+    step "applied to all displays"
+  else
+    warn "could not set the wallpaper"
+  fi
+}
+
 # fish aliases `ls|ll|lt` to `exa`, which Homebrew no longer ships. Link eza.
 install_exa_shim() {
   [ "$EXA_SHIM" = 1 ] || return 0
@@ -533,6 +582,7 @@ post_install() {
   install_tmux_plugins
   install_neovim_config
   install_sketchybar
+  install_wallpaper
   install_exa_shim
   start_services
 }
