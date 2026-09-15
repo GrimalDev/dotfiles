@@ -11,8 +11,10 @@
 # That command is aliased to `dots` in fish/config.fish.
 #
 # Usage
-#   Fresh machine (no repo yet):
-#     bash -c "$(curl -fsSL https://raw.githubusercontent.com/GrimalDev/dotfiles/aerospace/install.sh)"
+#   One line, always the latest revision of the default branch:
+#     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/GrimalDev/dotfiles/HEAD/install.sh)"
+#   Same, passing options through stdin:
+#     curl -fsSL https://raw.githubusercontent.com/GrimalDev/dotfiles/HEAD/install.sh | bash -s -- --dry-run
 #   From an existing checkout:
 #     ~/.config/install.sh
 #   Options:
@@ -39,6 +41,7 @@ BRANCH="${DOTFILES_BRANCH:-aerospace}"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"          # bare git dir
 CONFIG_DIR="${DOTFILES_WORKTREE:-$HOME/.config}"         # work tree
 BACKUP_ROOT="${DOTFILES_BACKUP_ROOT:-$HOME/.dotfiles-backup}"
+CLT_TIMEOUT="${DOTFILES_CLT_TIMEOUT:-1800}"
 
 # Third-party taps Homebrew refuses to load until explicitly trusted.
 TRUSTED_TAPS="felixkratz/formulae joshmedeski/sesh nikitabobko/tap"
@@ -49,6 +52,7 @@ SKIP_CHECKOUT=0
 SKIP_POST=0
 START_SERVICES=1
 EXA_SHIM=1
+INSTALL_ROSETTA=1
 DRY_RUN=0
 
 # ---------------------------------------------------------------------------
@@ -80,7 +84,42 @@ run() {
 # ---------------------------------------------------------------------------
 dots_git() { git --git-dir="$DOTFILES_DIR" --work-tree="$CONFIG_DIR" "$@"; }
 
-usage() { sed -n '2,34p' "$0" 2>/dev/null | sed 's/^# \{0,1\}//' || true; }
+usage() {
+  cat <<'USAGE'
+GrimalDev/dotfiles — installation script (macOS)
+
+This repo is a bare repository whose work-tree is ~/.config:
+    git --git-dir="$HOME/.dotfiles" --work-tree="$HOME/.config" <cmd>
+That command is aliased to `dots` in fish/config.fish.
+
+Latest, one line (default branch):
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/GrimalDev/dotfiles/HEAD/install.sh)"
+
+Same, passing options through stdin:
+    curl -fsSL https://raw.githubusercontent.com/GrimalDev/dotfiles/HEAD/install.sh | bash -s -- --dry-run
+
+From an existing checkout:
+    ~/.config/install.sh
+
+Installed automatically when missing:
+  Xcode Command Line Tools, Homebrew, Rosetta 2 (Apple Silicon only).
+
+Options:
+  -b, --branch <name>   Branch to check out          (default: aerospace)
+      --repo <url>      Override remote URL
+  -s, --skip-brew       Skip Homebrew + Brewfile
+  -c, --skip-checkout   Only install packages/post-install
+  -p, --skip-post       Skip shell/plugin/service wiring
+      --no-services     Do not start brew services
+      --no-shim         Do not create the exa->eza compatibility shim
+      --no-rosetta      Do not install Rosetta 2
+      --clt-timeout <s> Seconds to wait for Command Line Tools (default 1800)
+  -n, --dry-run         Print actions, change nothing
+  -h, --help            This help
+
+Idempotent: safe to re-run. Existing files are backed up, never deleted.
+USAGE
+}
 
 parse_args() {
   while [ $# -gt 0 ]; do
@@ -92,6 +131,8 @@ parse_args() {
       -p|--skip-post)   SKIP_POST=1; shift ;;
       --no-services)    START_SERVICES=0; shift ;;
       --no-shim)        EXA_SHIM=0; shift ;;
+      --no-rosetta)     INSTALL_ROSETTA=0; shift ;;
+      --clt-timeout)    CLT_TIMEOUT="${2:-}"; shift 2 ;;
       -n|--dry-run)     DRY_RUN=1; shift ;;
       -h|--help)        usage; exit 0 ;;
       *) die "unknown option: $1 (try --help)" ;;
@@ -99,6 +140,7 @@ parse_args() {
   done
   [ -n "$BRANCH" ] || die "--branch needs a value"
   [ -n "$REPO_URL" ] || die "--repo needs a value"
+  [ "$CLT_TIMEOUT" -gt 0 ] 2>/dev/null || die "--clt-timeout needs a positive number of seconds"
 }
 
 # ---------------------------------------------------------------------------
@@ -109,16 +151,62 @@ preflight() {
   [ "$(uname -s)" = "Darwin" ] || die "this installer only supports macOS"
   [ "$(id -u)" -ne 0 ] || die "do not run as root; run as your normal user"
   [ -n "${HOME:-}" ] || die "HOME is not set"
-
-  if ! command -v git >/dev/null 2>&1; then
-    warn "git not found. Installing Xcode Command Line Tools."
-    xcode-select --install 2>/dev/null || true
-    die "re-run this script once the Command Line Tools finish installing"
-  fi
-  step "git: $(git --version)"
+  step "macOS $(sw_vers -productVersion) ($(uname -m))"
   step "branch: $BRANCH"
   step "work-tree: $CONFIG_DIR"
   step "git-dir:   $DOTFILES_DIR"
+}
+
+# ---------------------------------------------------------------------------
+# Step 2 — base prerequisites (Xcode Command Line Tools, Rosetta 2)
+# ---------------------------------------------------------------------------
+ensure_clt() {
+  log "Xcode Command Line Tools"
+  if xcode-select -p >/dev/null 2>&1; then
+    step "present: $(xcode-select -p)"
+    return 0
+  fi
+
+  step "missing — requesting install (a system dialog will open)"
+  if [ "$DRY_RUN" = 1 ]; then
+    printf '%s  [dry-run] xcode-select --install%s\n' "$C_DIM" "$C_RESET"
+    return 0
+  fi
+
+  xcode-select --install 2>/dev/null || true
+  local waited=0
+  while ! xcode-select -p >/dev/null 2>&1; do
+    [ "$waited" -lt "$CLT_TIMEOUT" ] \
+      || die "Command Line Tools did not finish within ${CLT_TIMEOUT}s — complete the dialog, then re-run"
+    sleep 10
+    waited=$((waited + 10))
+    if [ $((waited % 60)) -eq 0 ]; then
+      step "waiting for Command Line Tools (${waited}s)"
+    fi
+  done
+  step "installed: $(xcode-select -p)"
+}
+
+ensure_rosetta() {
+  [ "$INSTALL_ROSETTA" = 1 ] || return 0
+  [ "$(uname -m)" = "arm64" ] || return 0
+
+  log "Rosetta 2"
+  if [ -d /Library/Apple/usr/libexec/oah ]; then
+    step "present"
+    return 0
+  fi
+  step "missing — installing (license auto-accepted)"
+  run /usr/sbin/softwareupdate --install-rosetta --agree-to-license \
+    || warn "Rosetta not installed (native tools do not need it)"
+}
+
+install_bases() {
+  log "Base prerequisites"
+  ensure_clt
+  command -v git >/dev/null 2>&1 || die "git still missing after the Command Line Tools install"
+  step "git: $(git --version)"
+  ensure_rosetta
 }
 
 # ---------------------------------------------------------------------------
@@ -424,6 +512,7 @@ main() {
   [ "$DRY_RUN" = 1 ] && log "DRY RUN — no changes will be made"
 
   preflight
+  install_bases
   [ "$SKIP_BREW" = 1 ] || install_homebrew
   detect_brew
   if [ "$SKIP_BREW" = 0 ] && [ -n "$BREW_BIN" ]; then
