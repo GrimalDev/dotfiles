@@ -62,6 +62,7 @@ INSTALL_ROSETTA=1
 REPLACE_NVIM=0
 SET_WALLPAPER=1
 SET_VIVALDI=1
+SET_KEYBOARD_LAYOUT=1
 DRY_RUN=0
 CONFIG_ONLY=0
 CONFIG_TOOL=""
@@ -121,6 +122,7 @@ Also configured:
   ~/.config/nvim from NvChad/starter + github.com/GrimalDev/nvim-config.
   Desktop picture from ~/.config/wallpapers/ (via desktoppr or osascript).
   All Vivaldi settings incl. keyboard shortcuts (vivaldi/vivaldi-settings.json).
+  US - Alt Shortcuts keyboard layout, installed and selected for this user.
 
 Options:
   -b, --branch <name>   Branch to check out          (default: aerospace)
@@ -136,6 +138,7 @@ Options:
       --replace-nvim    Rebuild ~/.config/nvim from the nvim-config repo
       --no-wallpaper    Do not set the desktop picture from wallpapers/
       --no-vivaldi      Do not deploy vivaldi/Preferences to the Vivaldi profile
+      --no-keyboard-layout  Skip installing/activating the Alt shortcut layout
       --clt-timeout <s> Seconds to wait for Command Line Tools (default 1800)
   -n, --dry-run         Print actions, change nothing
   -h, --help            This help
@@ -145,11 +148,15 @@ Config-only examples:
     ~/.config/install.sh --config
     ~/.config/install.sh --config fish --dry-run
     ~/.config/install.sh --config karabiner
+    ~/.config/install.sh --config keyboard
 
 Config-only mode copies the committed folder from --branch, using the local
 bare repo when available, otherwise a temporary clone of --repo. It backs up
 the existing folder and skips packages, plugins, shell changes, and services.
-It does not change the Git index or switch branches.
+It does not change the Git index or switch branches. The keyboard folder also
+installs and activates its layout in ~/Library/Keyboard Layouts. This suppresses
+Option-generated symbols; app shortcuts still require app support. Use
+--no-keyboard-layout to copy the folder without activating it.
 
 Idempotent: safe to re-run. Existing files are backed up, never deleted.
 USAGE
@@ -179,6 +186,7 @@ parse_args() {
       --replace-nvim)   REPLACE_NVIM=1; shift ;;
       --no-wallpaper)   SET_WALLPAPER=0; shift ;;
       --no-vivaldi)     SET_VIVALDI=0; shift ;;
+      --no-keyboard-layout) SET_KEYBOARD_LAYOUT=0; shift ;;
       --clt-timeout)    CLT_TIMEOUT="${2:-}"; shift 2 ;;
       -n|--dry-run)     DRY_RUN=1; shift ;;
       -h|--help)        usage; exit 0 ;;
@@ -747,6 +755,51 @@ start_services() {
   done
 }
 
+# Install the layout separately from ~/.config, where macOS discovers it.
+install_keyboard_layout() {
+  [ "$SET_KEYBOARD_LAYOUT" = 1 ] || return 0
+  local src="$CONFIG_DIR/keyboard/US - Alt Shortcuts.keylayout"
+  [ -f "$src" ] || return 0
+  local destdir="${DOTFILES_KEYBOARD_LAYOUT_DIR:-$HOME/Library/Keyboard Layouts}"
+  local dest="$destdir/US - Alt Shortcuts.keylayout" backup tmp
+  log "Keyboard layout: US - Alt Shortcuts"
+  if [ "$DRY_RUN" = 1 ]; then
+    step "would install $src -> $dest (backing up any different existing layout)"
+    step "would register and select US - Alt Shortcuts for this user"
+    return 0
+  fi
+  mkdir -p "$destdir"
+  if ! cmp -s "$src" "$dest"; then
+    if [ -e "$dest" ] || [ -L "$dest" ]; then
+      mkdir -p "$BACKUP_ROOT"
+      backup="$(mktemp -d "$BACKUP_ROOT/keyboard-XXXXXX")"
+      cp -Pp "$dest" "$backup/US - Alt Shortcuts.keylayout"
+      step "backup: $backup/US - Alt Shortcuts.keylayout"
+    fi
+    tmp="$(mktemp "$destdir/.dotfiles-layout-XXXXXX")"
+    if ! cp "$src" "$tmp" || ! chmod 644 "$tmp" || ! mv -f "$tmp" "$dest"; then
+      rm -f "$tmp"
+      die "could not install keyboard layout at $dest"
+    fi
+  fi
+  activate_keyboard_layout "$dest"
+}
+
+activate_keyboard_layout() {
+  local dest="$1" tmp
+  tmp="$(mktemp -d)"
+  # Full installs already check CLT; config-only mode may lack a working compiler.
+  if /usr/bin/xcrun clang "$CONFIG_DIR/keyboard/activate.c" -framework Carbon \
+      -o "$tmp/activate" >"$tmp/build.log" 2>&1 && "$tmp/activate" "$dest"; then
+    step "US - Alt Shortcuts is selected; U.S. remains available to switch back"
+  else
+    warn "layout installed, but automatic activation failed"
+    warn "select US - Alt Shortcuts in System Settings > Keyboard > Text Input > Edit"
+    warn "if it is missing, log out and back in first"
+  fi
+  rm -rf "$tmp"
+}
+
 post_install() {
   fix_permissions
   set_default_shell
@@ -756,6 +809,7 @@ post_install() {
   install_sketchybar
   install_wallpaper
   install_vivaldi_settings
+  install_keyboard_layout
   install_exa_shim
   start_services
 }
@@ -837,6 +891,9 @@ install_config_only() (
   if [ "$DRY_RUN" = 1 ]; then
     step "would back up any existing folder or symlink under $BACKUP_ROOT"
     step "would copy only the committed $CONFIG_TOOL folder"
+    if [ "$CONFIG_TOOL" = keyboard ] && [ "$SET_KEYBOARD_LAYOUT" = 1 ]; then
+      step "would install and activate US - Alt Shortcuts in ~/Library/Keyboard Layouts"
+    fi
     return 0
   fi
 
@@ -859,6 +916,7 @@ install_config_only() (
     die "config copy failed; restored the previous config if present"
   fi
   step "installed $CONFIG_TOOL"
+  if [ "$CONFIG_TOOL" = keyboard ]; then install_keyboard_layout; fi
 )
 
 # ---------------------------------------------------------------------------
