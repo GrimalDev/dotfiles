@@ -1,5 +1,17 @@
 local colors = require("colors")
 local settings = require("settings")
+local orientation = require("helpers.bar-orientation")
+
+-- Launch agents may have a smaller PATH than an interactive shell.
+local calendar_command = "ical-guy"
+for _, path in ipairs({ "/opt/homebrew/bin/ical-guy", "/usr/local/bin/ical-guy", os.getenv("HOME") .. "/.local/bin/ical-guy" }) do
+    local file = io.open(path, "r")
+    if file then
+        file:close()
+        calendar_command = "'" .. path:gsub("'", "'\\''") .. "'"
+        break
+    end
+end
 
 local function add_meeting_row(name, font_size, update_freq)
 	return sbar.add("item", name, {
@@ -21,6 +33,13 @@ local function add_meeting_row(name, font_size, update_freq)
 	})
 end
 
+local meeting_spacer = sbar.add("item", "meeting.centering", {
+    position = "e", width = 0, drawing = false,
+    icon = { drawing = false }, label = { drawing = false },
+    background = { drawing = false }, padding_left = 0, padding_right = 0,
+})
+local spacer_width = 0
+
 local meeting_time = add_meeting_row("meeting.time", 12.0)
 local meeting_label = add_meeting_row("meeting.label", 11.0)
 local meeting_next = add_meeting_row("meeting.next", 11.0)
@@ -41,9 +60,60 @@ local meeting_card = sbar.add("bracket", "meeting.card", {
 	padding_right = 3,
 })
 
+local function center_meeting()
+    if not orientation.horizontal then return end
+    sbar.delay(0.05, function()
+        if not orientation.horizontal then return end
+        local screen
+        for _, display in ipairs(orientation.displays) do
+            if not screen or display.main == true or display.main == 1 then screen = display end
+            if (display.builtin == true or display.builtin == 1) and display.notch_height > 0 then
+                screen = display
+                break
+            end
+        end
+        if not screen then return end
+        local query = meeting_card:query()
+        local bounds = query.bounding_rects and query.bounding_rects["display-1"]
+        if not bounds then return end
+        local notch = screen.notch_width or 0
+        local target = (screen.width + (screen.width + notch) / 2) / 2
+        local current = bounds.origin[1] + bounds.size[1] / 2
+        local next_width = math.max(0, math.floor(spacer_width + target - current + 0.5))
+        if next_width ~= spacer_width then
+            spacer_width = next_width
+            meeting_spacer:set({ width = spacer_width })
+        end
+    end)
+end
+
+local function apply_orientation(horizontal)
+    spacer_width = 0
+    meeting_spacer:set({ drawing = horizontal, width = 0 })
+    for _, item in ipairs({ meeting_icon, meeting_next, meeting_label, meeting_time }) do
+        item:set({
+            position = horizontal and "e" or "right",
+            width = horizontal and "dynamic" or 16,
+            padding_left = horizontal and 3 or 0,
+            padding_right = horizontal and 3 or 0,
+            label = { padding_left = 3, padding_right = 3 },
+        })
+    end
+    meeting_icon:set({ label = { font = { size = horizontal and 16.0 or 22.0 } } })
+    meeting_card:set({ background = { height = horizontal and 24 or 0, corner_radius = horizontal and 5 or 7 } })
+    if horizontal then
+        sbar.exec("sketchybar --reorder meeting.centering meeting.icon meeting.next meeting.label meeting.time", center_meeting)
+    else
+        sbar.exec("sketchybar --reorder meeting.time meeting.label meeting.next meeting.icon")
+    end
+end
+orientation.subscribe(apply_orientation)
+
 meeting_time:set({
 	popup = {
 		align = "right",
+        height = 44,
+        y_offset = 4,
 		background = {
 			color = colors.popup.bg,
 			border_color = colors.popup.border,
@@ -57,7 +127,7 @@ meeting_time:set({
 local popup_heading = sbar.add("item", "meeting.popup.heading", {
 	position = "popup.meeting.time",
 	icon = { string = "󰃭", color = colors.yellow, width = 24, align = "center" },
-	label = { string = "UPCOMING EVENTS", align = "left", color = colors.green, width = 236, font = { size = 10.0 } },
+	label = { string = "TODAY’S EVENTS", align = "left", color = colors.green, width = 236, font = { size = 10.0 } },
 })
 
 local popup_events = {}
@@ -132,7 +202,7 @@ local function event_epoch(timestamp, callback)
 	sbar.exec(
 		"date -j -f " .. shell_quote("%Y-%m-%dT%H:%M:%S%z") .. " " .. shell_quote(normalized) .. " +%s",
 		function(result)
-			callback(tonumber(result:match("%d+")))
+			callback(tonumber(result))
 		end
 	)
 end
@@ -143,10 +213,20 @@ local function show_no_meetings()
 	meeting_next:set({ label = { drawing = true, string = "NO", color = colors.grey }, click_script = "" })
 	meeting_label:set({ label = { drawing = true, string = "MEETINGS", color = colors.grey }, click_script = "" })
 	meeting_time:set({ label = { drawing = false }, click_script = "" })
+    center_meeting()
+end
+
+local function show_calendar_error()
+    meeting_card:set({ background = { drawing = true, border_color = colors.orange } })
+    meeting_icon:set({ label = { drawing = true, string = "󰃭", color = colors.orange }, click_script = "" })
+    meeting_next:set({ label = { drawing = true, string = "CALENDAR", color = colors.orange }, click_script = "" })
+    meeting_label:set({ label = { drawing = true, string = "ERROR", color = colors.orange }, click_script = "" })
+    meeting_time:set({ label = { drawing = false }, click_script = "" })
+    center_meeting()
 end
 
 local function hide_popup_event(row)
-	row:set({ icon = { drawing = false }, label = { drawing = false }, click_script = "" })
+	row:set({ drawing = false, background = { drawing = false }, icon = { drawing = false }, label = { drawing = false }, click_script = "" })
 end
 
 local function calendar_color(event)
@@ -156,6 +236,14 @@ local function calendar_color(event)
 		return tonumber("0xff" .. hex:sub(2))
 	end
 	return colors.teal
+end
+
+local function popup_title(title)
+    local count = utf8.len(title)
+    if count and count > 24 then
+        return title:sub(1, utf8.offset(title, 24) - 1) .. "…"
+    end
+    return title
 end
 
 local function update_popup_event(row, event)
@@ -169,18 +257,19 @@ local function update_popup_event(row, event)
 	local link = json_string(event, "meetingUrl")
 	local click_script = link == "" and "" or "open " .. shell_quote(link)
 	event_epoch(start, function(start_epoch)
-		if not start_epoch then
+		if not start_epoch or os.date("%Y-%m-%d", start_epoch) ~= os.date("%Y-%m-%d") then
 			hide_popup_event(row)
 			return
 		end
 
 		row:set({
+            drawing = true,
 			icon = {
 				drawing = true,
 				string = os.date("%H:%M", start_epoch),
 				color = link == "" and calendar_color(event) or colors.teal,
 			},
-			label = { drawing = true, string = #title > 26 and title:sub(1, 25) .. "…" or title },
+			label = { drawing = true, string = popup_title(title) },
 			background = { drawing = true },
 			click_script = click_script,
 		})
@@ -188,7 +277,7 @@ local function update_popup_event(row, event)
 end
 
 local function update_popup_events()
-	sbar.exec("ical-guy events --from now --to today+2 --exclude-all-day --group-by none --limit 5 --format json", function(result)
+	sbar.exec(calendar_command .. " events --from now --to today+1 --exclude-all-day --group-by none --limit 5 --format json", function(result)
 		local events = type(result) == "table" and result or {}
 		for index, row in ipairs(popup_events) do
 			update_popup_event(row, events[index])
@@ -201,7 +290,11 @@ local function set_popup_visible(visible)
 end
 
 local function update_meeting()
-	sbar.exec("ical-guy meeting next --format json", function(result)
+	sbar.exec(calendar_command .. " meeting next --format json", function(result, code)
+        if code ~= 0 then
+            show_calendar_error()
+            return
+        end
 		local event = type(result) == "table" and result[1] or result
 		local title = json_string(event, "title")
 		if title == "" then
@@ -214,9 +307,15 @@ local function update_meeting()
 		local link = json_string(event, "meetingUrl")
 		event_epoch(start, function(start_epoch)
 			if not start_epoch then
-				show_no_meetings()
+				show_calendar_error()
 				return
 			end
+
+            -- Compare local calendar dates, including across UTC and DST boundaries.
+            if os.date("%Y-%m-%d", start_epoch) ~= os.date("%Y-%m-%d") then
+                show_no_meetings()
+                return
+            end
 
 			local click_script = link == "" and "" or "open " .. shell_quote(link)
 			meeting_icon:set({ click_script = click_script })
@@ -243,6 +342,7 @@ local function update_meeting()
 				meeting_label:set({ label = { drawing = true, string = "MEETING", color = colors.red } })
 					meeting_time:set({ label = { drawing = true, string = "NOW", color = white } })
 				end
+			    center_meeting()
 			end)
 		end)
 	end)
@@ -284,4 +384,6 @@ local function refresh_meeting()
 end
 
 meeting_icon:subscribe({ "forced", "routine", "system_woke" }, refresh_meeting)
+meeting_spacer:set({ updates = true, update_freq = 2 })
+meeting_spacer:subscribe("routine", center_meeting)
 refresh_meeting()

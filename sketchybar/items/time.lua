@@ -1,5 +1,6 @@
 local settings = require("settings")
 local colors = require("colors")
+local orientation = require("helpers.bar-orientation")
 
 -- Convert color to hex string
 -- local function to_hex(color)
@@ -85,4 +86,8 @@ end)
 -- Prevent window from closing when clicking inside
 time:subscribe("mouse.clicked.inside", function(env)
 	return
+end)
+
+orientation.subscribe(function(horizontal)
+    time:set({ padding_right = horizontal and 10 or 0 })
 end)

@@ -53,9 +53,11 @@ PATH = '/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}'
 [gaps]
 inner.horizontal = 5
 inner.vertical = 5
-outer.left = [{ monitor.main = 55 }, 5]
+# BEGIN SKETCHYBAR DISPLAY GAPS
+outer.left = 5
+outer.top = [{ monitor."^Built-in Retina Display$" = 5 }, 5]
+# END SKETCHYBAR DISPLAY GAPS
 outer.bottom = 5
-outer.top = 5
 outer.right = 5
 
 # Key mapping

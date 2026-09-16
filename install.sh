@@ -361,6 +361,11 @@ install_packages() {
     fi
   done
 
+  # Trust only the calendar helper, not every package in its third-party tap.
+  if "$BREW_BIN" trust --help >/dev/null 2>&1; then
+    run "$BREW_BIN" trust --formula itspriddle/brews/ical-guy || warn "could not trust ical-guy (continuing)"
+  fi
+
   run "$BREW_BIN" update || warn "brew update failed (continuing)"
   run "$BREW_BIN" bundle install --file="$brewfile"
   step "done"

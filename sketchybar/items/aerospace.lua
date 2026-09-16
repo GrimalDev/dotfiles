@@ -106,6 +106,9 @@ sbar.exec("aerospace list-workspaces --all --format '%{workspace}%{monitor-id}' 
 					-- Padding space
 					local space_padding = sbar.add("item", "space.padding." .. space_name, {
 						script = "",
+                        icon = { drawing = false },
+                        label = { drawing = false },
+                        background = { drawing = false },
 						width = settings.aerospace_padding,
 						associated_display = monitor_id,
 					})

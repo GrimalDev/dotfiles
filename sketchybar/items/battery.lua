@@ -1,6 +1,7 @@
 local icons = require("icons")
 local colors = require("colors")
 local settings = require("settings")
+local orientation = require("helpers.bar-orientation")
 
 local battery = sbar.add("item", "battery", {
 	position = "right",
@@ -95,6 +96,17 @@ sbar.add("bracket", "battery.bracket", { battery.name }, {
 })
 
 sbar.add("item", "battery.padding", {
+    icon = { drawing = false },
+    label = { drawing = false },
+    background = { drawing = false },
 	position = "right",
 	width = settings.group_paddings,
 })
+
+orientation.subscribe(function(horizontal)
+    battery:set({
+        icon = { padding_left = horizontal and 5 or settings.paddings, padding_right = horizontal and 4 or 0 },
+        label = { padding_left = horizontal and 3 or settings.paddings, padding_right = horizontal and 5 or settings.paddings },
+        background = { height = horizontal and 24 or 25 },
+    })
+end)

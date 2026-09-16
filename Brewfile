@@ -53,6 +53,7 @@ brew "gh"
 # sketchybar runs on the Lua config committed in sketchybar/ (sketchybarrc
 # shebang is `#!/usr/bin/env lua`), so it needs lua + the SbarLua module.
 brew "sketchybar"
+brew "itspriddle/brews/ical-guy" # meeting widget
 brew "borders"
 brew "lua"
 brew "switchaudio-osx"      # sketchybar/helpers (volume item)
