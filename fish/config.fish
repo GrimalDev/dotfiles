@@ -8,6 +8,14 @@ set -gx VISUAL "nvim"
 set -gx XDEBUG_SESSION 1
 set -gx HOMEBREW_NO_AUTO_UPDATE 1
 
+# CLT 26.6 cannot link against the installed macOS 27 SDK.
+# Keep the tested SDK until the toolchain is updated; respect explicit overrides.
+if not set -q SDKROOT
+    if test -d /Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk
+        set -gx SDKROOT /Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk
+    end
+end
+
 set -e fish_user_paths
 
 set -l m2_path "$HOME/.local/bin/apache-maven-3.9.11"

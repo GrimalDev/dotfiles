@@ -20,6 +20,8 @@
 #   Options:
 #     -b, --branch <name>   Branch to check out          (default: aerospace)
 #         --repo <url>      Override remote URL
+#         --config [tool]   Install only this config folder; omit tool for a menu
+#         --list-configs    List config folders from the selected Git branch
 #     -s, --skip-brew       Skip Homebrew + Brewfile
 #     -c, --skip-checkout   Only install packages/post-install
 #     -p, --skip-post       Skip shell/plugin/service wiring
@@ -61,6 +63,10 @@ REPLACE_NVIM=0
 SET_WALLPAPER=1
 SET_VIVALDI=1
 DRY_RUN=0
+CONFIG_ONLY=0
+CONFIG_TOOL=""
+LIST_CONFIGS=0
+REPO_OVERRIDE=0
 
 # ---------------------------------------------------------------------------
 # Output helpers
@@ -119,6 +125,8 @@ Also configured:
 Options:
   -b, --branch <name>   Branch to check out          (default: aerospace)
       --repo <url>      Override remote URL
+      --config [tool]   Install only this config folder; omit tool for a menu
+      --list-configs    List config folders from the selected Git branch
   -s, --skip-brew       Skip Homebrew + Brewfile
   -c, --skip-checkout   Only install packages/post-install
   -p, --skip-post       Skip shell/plugin/service wiring
@@ -132,6 +140,17 @@ Options:
   -n, --dry-run         Print actions, change nothing
   -h, --help            This help
 
+Config-only examples:
+    ~/.config/install.sh --list-configs
+    ~/.config/install.sh --config
+    ~/.config/install.sh --config fish --dry-run
+    ~/.config/install.sh --config karabiner
+
+Config-only mode copies the committed folder from --branch, using the local
+bare repo when available, otherwise a temporary clone of --repo. It backs up
+the existing folder and skips packages, plugins, shell changes, and services.
+It does not change the Git index or switch branches.
+
 Idempotent: safe to re-run. Existing files are backed up, never deleted.
 USAGE
 }
@@ -140,7 +159,17 @@ parse_args() {
   while [ $# -gt 0 ]; do
     case "$1" in
       -b|--branch)      BRANCH="${2:-}"; shift 2 ;;
-      --repo)           REPO_URL="${2:-}"; shift 2 ;;
+      --repo)           REPO_URL="${2:-}"; REPO_OVERRIDE=1; shift 2 ;;
+      --list-configs)  LIST_CONFIGS=1; shift ;;
+      --config)
+        CONFIG_ONLY=1; shift
+        if [ $# -gt 0 ]; then
+          case "$1" in
+            -*) ;;
+            *) CONFIG_TOOL="$1"; shift ;;
+          esac
+        fi
+        ;;
       -s|--skip-brew)   SKIP_BREW=1; shift ;;
       -c|--skip-checkout) SKIP_CHECKOUT=1; shift ;;
       -p|--skip-post)   SKIP_POST=1; shift ;;
@@ -753,12 +782,96 @@ summary() {
 EOF
 }
 
+# Config-only operations never check out or reset the live bare repository.
+install_config_only() (
+  command -v git >/dev/null 2>&1 || die "git is required for config-only mode"
+  local tmp source_ref source_git name choice target backup
+  local folders=()
+  tmp="$(mktemp -d)"
+  trap 'rm -rf "$tmp"' EXIT
+
+  if [ "$REPO_OVERRIDE" = 0 ] && [ -d "$DOTFILES_DIR" ]; then
+    source_git="$DOTFILES_DIR"
+  else
+    source_git="$tmp/repo.git"
+    git clone --quiet --bare --single-branch --branch "$BRANCH" "$REPO_URL" "$source_git" \
+      || die "could not read branch $BRANCH from $REPO_URL"
+  fi
+  source_ref="refs/heads/$BRANCH"
+  git --git-dir="$source_git" rev-parse --verify "$source_ref^{commit}" >/dev/null 2>&1 \
+    || die "branch $BRANCH does not exist in $source_git"
+
+  # Only top-level trees qualify. NUL delimiters preserve spaces in folder names.
+  git --git-dir="$source_git" ls-tree -z -d --name-only "$source_ref" > "$tmp/folders"
+  while IFS= read -r -d '' name; do
+    folders[${#folders[@]}]="$name"
+  done < "$tmp/folders"
+  [ "${#folders[@]}" -gt 0 ] || die "no config folders found on $BRANCH"
+
+  if [ "$LIST_CONFIGS" = 1 ]; then
+    printf '%s\n' "${folders[@]}"
+    return 0
+  fi
+  if [ -z "$CONFIG_TOOL" ]; then
+    [ -t 0 ] || die "specify --config <tool>, or use --list-configs to see folder names"
+    PS3="Config folder number: "
+    select choice in "${folders[@]}"; do
+      if [ -n "$choice" ]; then CONFIG_TOOL="$choice"; break; fi
+      warn "choose a number from the list"
+    done
+    [ -n "$CONFIG_TOOL" ] || die "no config selected"
+  fi
+  local found=0
+  for name in "${folders[@]}"; do
+    [ "$name" != "$CONFIG_TOOL" ] || found=1
+  done
+  [ "$found" = 1 ] || die "unknown config: $CONFIG_TOOL (use --list-configs)"
+
+  if [ "$CONFIG_TOOL" = karabiner ]; then
+    git --git-dir="$source_git" cat-file -e "$source_ref:karabiner/karabiner.json" 2>/dev/null \
+      || die "karabiner/karabiner.json is missing from $BRANCH; assets alone do not enable mappings"
+  fi
+
+  target="$CONFIG_DIR/$CONFIG_TOOL"
+  log "Config only: $CONFIG_TOOL from $BRANCH -> $target"
+  if [ "$DRY_RUN" = 1 ]; then
+    step "would back up any existing folder or symlink under $BACKUP_ROOT"
+    step "would copy only the committed $CONFIG_TOOL folder"
+    return 0
+  fi
+
+  # Extract before touching the destination, so archive failures leave it intact.
+  mkdir -p "$tmp/config"
+  git --git-dir="$source_git" archive "$source_ref" -- "$CONFIG_TOOL" \
+    | tar -xf - -C "$tmp/config"
+  [ -d "$tmp/config/$CONFIG_TOOL" ] || die "could not extract $CONFIG_TOOL"
+  mkdir -p "$CONFIG_DIR"
+  backup=""
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    mkdir -p "$BACKUP_ROOT"
+    backup="$(mktemp -d "$BACKUP_ROOT/config-$(date +%Y%m%d-%H%M%S)-XXXXXX")"
+    mv "$target" "$backup/$CONFIG_TOOL"
+    step "backup: $backup/$CONFIG_TOOL"
+  fi
+  if ! cp -Rp "$tmp/config/$CONFIG_TOOL" "$target"; then
+    rm -rf "$target"
+    if [ -n "$backup" ]; then mv "$backup/$CONFIG_TOOL" "$target"; fi
+    die "config copy failed; restored the previous config if present"
+  fi
+  step "installed $CONFIG_TOOL"
+)
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 main() {
   parse_args "$@"
   [ "$DRY_RUN" = 1 ] && log "DRY RUN — no changes will be made"
+
+  if [ "$CONFIG_ONLY" = 1 ] || [ "$LIST_CONFIGS" = 1 ]; then
+    install_config_only
+    return 0
+  fi
 
   preflight
   install_bases
