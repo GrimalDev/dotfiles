@@ -246,106 +246,113 @@ local function popup_title(title)
     return title
 end
 
-local function update_popup_event(row, event)
-	local title = json_string(event, "title")
-	if title == "" then
-		hide_popup_event(row)
-		return
-	end
-
-	local start = json_string(event, "startDate")
-	local link = json_string(event, "meetingUrl")
-	local click_script = link == "" and "" or "open " .. shell_quote(link)
-	event_epoch(start, function(start_epoch)
-		if not start_epoch or os.date("%Y-%m-%d", start_epoch) ~= os.date("%Y-%m-%d") then
-			hide_popup_event(row)
-			return
-		end
-
-		row:set({
+local function update_popup_event(row, entry, now)
+    if not entry then
+        hide_popup_event(row)
+        return
+    end
+    local event = entry.event
+    local active = entry.start <= now and now < entry.finish
+    local link = json_string(event, "meetingUrl")
+    row:set({
+        drawing = true,
+        icon = {
             drawing = true,
-			icon = {
-				drawing = true,
-				string = os.date("%H:%M", start_epoch),
-				color = link == "" and calendar_color(event) or colors.teal,
-			},
-			label = { drawing = true, string = popup_title(title) },
-			background = { drawing = true },
-			click_script = click_script,
-		})
-	end)
-end
-
-local function update_popup_events()
-	sbar.exec(calendar_command .. " events --from now --to today+1 --exclude-all-day --group-by none --limit 5 --format json", function(result)
-		local events = type(result) == "table" and result or {}
-		for index, row in ipairs(popup_events) do
-			update_popup_event(row, events[index])
-		end
-	end)
+            string = os.date("%H:%M", entry.start),
+            color = active and colors.orange or (link == "" and calendar_color(event) or colors.teal),
+        },
+        label = {
+            drawing = true,
+            string = popup_title(json_string(event, "title")),
+            color = active and colors.yellow or white,
+        },
+        background = {
+            drawing = true,
+            color = active and colors.bg1 or colors.bg2,
+            border_color = active and colors.orange or colors.bar.border,
+        },
+        click_script = link == "" and "" or "open " .. shell_quote(link),
+    })
 end
 
 local function set_popup_visible(visible)
-	meeting_time:set({ popup = { drawing = visible } })
+    meeting_time:set({ popup = { drawing = visible } })
 end
 
-local function update_meeting()
-	sbar.exec(calendar_command .. " meeting next --format json", function(result, code)
-        if code ~= 0 then
+local function update_meeting(entry, now)
+    if not entry then
+        show_no_meetings()
+        return
+    end
+    local link = json_string(entry.event, "meetingUrl")
+    local active = entry.start <= now and now < entry.finish
+    local click_script = link == "" and "" or "open " .. shell_quote(link)
+    for _, item in ipairs({ meeting_icon, meeting_next, meeting_label, meeting_time }) do
+        item:set({ click_script = click_script })
+    end
+    meeting_card:set({ background = { drawing = true, border_color = active and colors.red or colors.teal } })
+    meeting_icon:set({ label = { drawing = true, string = "󰃭", color = active and colors.orange or colors.yellow } })
+    meeting_next:set({ label = { drawing = true, string = active and "IN" or "NEXT", color = active and colors.red or colors.green } })
+    meeting_label:set({ label = { drawing = true, string = "MEETING", color = active and colors.red or colors.green } })
+    meeting_time:set({ label = {
+        drawing = true,
+        string = os.date("%H:%M", entry.start),
+        color = active and white or colors.yellow,
+    } })
+    center_meeting()
+end
+
+-- Fetch the whole day so meetings remain present after their start time.
+-- Filter and sort before applying the popup's five-row limit.
+local refreshing = false
+local function refresh_meeting()
+    if refreshing then return end
+    refreshing = true
+    sbar.exec(calendar_command .. " events --from today --to tomorrow --exclude-all-day --group-by none --format json", function(result, code)
+        if code ~= 0 or type(result) ~= "table" then
+            refreshing = false
             show_calendar_error()
+            for _, row in ipairs(popup_events) do hide_popup_event(row) end
             return
         end
-		local event = type(result) == "table" and result[1] or result
-		local title = json_string(event, "title")
-		if title == "" then
-			show_no_meetings()
-			return
-		end
-
-		local start = json_string(event, "startDate")
-		local finish = json_string(event, "endDate")
-		local link = json_string(event, "meetingUrl")
-		event_epoch(start, function(start_epoch)
-			if not start_epoch then
-				show_calendar_error()
-				return
-			end
-
-            -- Compare local calendar dates, including across UTC and DST boundaries.
-            if os.date("%Y-%m-%d", start_epoch) ~= os.date("%Y-%m-%d") then
-                show_no_meetings()
-                return
+        local entries = {}
+        local pending = #result
+        local function render()
+            refreshing = false
+            local now = os.time()
+            local today = os.date("%Y-%m-%d", now)
+            local remaining = {}
+            for _, entry in ipairs(entries) do
+                if entry.finish > now and os.date("%Y-%m-%d", entry.start) == today then
+                    table.insert(remaining, entry)
+                end
             end
-
-			local click_script = link == "" and "" or "open " .. shell_quote(link)
-			meeting_icon:set({ click_script = click_script })
-			meeting_next:set({ click_script = click_script })
-			meeting_label:set({ click_script = click_script })
-			meeting_time:set({ click_script = click_script })
-			event_epoch(finish, function(finish_epoch)
-				if os.time() < start_epoch then
-				meeting_card:set({ background = { drawing = true, border_color = colors.teal } })
-				meeting_icon:set({ label = { drawing = true, string = "󰃭", color = colors.yellow } })
-				meeting_next:set({ label = { drawing = true, string = "NEXT", color = colors.green } })
-				meeting_label:set({ label = { drawing = true, string = "MEETING", color = colors.green } })
-				meeting_time:set({
-					label = {
-						drawing = true,
-						string = os.date("%H:%M", start_epoch),
-						color = colors.yellow,
-						},
-				})
-			else
-				meeting_card:set({ background = { drawing = true, border_color = colors.red } })
-				meeting_icon:set({ label = { drawing = true, string = "󰃭", color = colors.orange } })
-				meeting_next:set({ label = { drawing = true, string = "IN", color = colors.red } })
-				meeting_label:set({ label = { drawing = true, string = "MEETING", color = colors.red } })
-					meeting_time:set({ label = { drawing = true, string = "NOW", color = white } })
-				end
-			    center_meeting()
-			end)
-		end)
-	end)
+            table.sort(remaining, function(a, b) return a.start < b.start end)
+            local meeting
+            for _, entry in ipairs(remaining) do
+                if json_string(entry.event, "meetingUrl") ~= "" then
+                    meeting = entry
+                    break
+                end
+            end
+            update_meeting(meeting, now)
+            for index, row in ipairs(popup_events) do
+                update_popup_event(row, remaining[index], now)
+            end
+        end
+        if pending == 0 then render(); return end
+        for _, event in ipairs(result) do
+            event_epoch(json_string(event, "startDate"), function(start_epoch)
+                event_epoch(json_string(event, "endDate"), function(finish_epoch)
+                    if start_epoch and finish_epoch and json_string(event, "title") ~= "" then
+                        table.insert(entries, { event = event, start = start_epoch, finish = finish_epoch })
+                    end
+                    pending = pending - 1
+                    if pending == 0 then render() end
+                end)
+            end)
+        end
+    end)
 end
 
 local hover_targets = {}
@@ -376,11 +383,6 @@ for _, item in ipairs(hover_items) do
 			end
 		end)
 	end)
-end
-
-local function refresh_meeting()
-	update_meeting()
-	update_popup_events()
 end
 
 meeting_icon:subscribe({ "forced", "routine", "system_woke" }, refresh_meeting)
