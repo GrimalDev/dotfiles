@@ -224,27 +224,41 @@ check_toolchain() {
 
   local tmp
   tmp="$(mktemp -d)"
-  if printf 'int main(void){return 0;}\n' | clang -x c - -o "$tmp/probe" >"$tmp/log" 2>&1; then
-    step "clang builds and links"
+
+  printf 'int main(void){return 0;}\n' | clang -x c - -o "$tmp/plain" >"$tmp/plain.log" 2>&1 || true
+  printf '#include <CoreFoundation/CoreFoundation.h>\nint main(void){CFRunLoopGetCurrent();return 0;}\n' \
+    | clang -x c - -framework CoreFoundation -o "$tmp/cf" >"$tmp/cf.log" 2>&1 || true
+
+  if [ -x "$tmp/plain" ] && [ -x "$tmp/cf" ]; then
+    step "clang builds and links (CoreFoundation ok)"
     rm -rf "$tmp"
     return 0
   fi
 
-  warn "clang cannot build and link a trivial program"
-  if grep -qE 'tapi error|malformed file|unknown architecture' "$tmp/log" 2>/dev/null; then
-    warn "the toolchain does not match the SDK it targets"
-    warn "clang:        $(clang -v 2>&1 | sed -n 's/^InstalledDir: //p')"
-    warn "xcode-select: $(xcode-select -p 2>/dev/null)"
-    case "$(xcode-select -p 2>/dev/null)" in
-      /Applications/Xcode*.app/*)
-        warn "align them:   sudo xcode-select -switch /Library/Developer/CommandLineTools" ;;
-      *)
-        warn "reinstall:    sudo rm -rf /Library/Developer/CommandLineTools && xcode-select --install" ;;
-    esac
-    warn "sketchybar helpers and SbarLua cannot build until this is fixed"
-  else
-    tail -3 "$tmp/log" | sed 's/^/    /'
+  warn "this machine cannot link normally"
+  warn "  plain executable:    $([ -x "$tmp/plain" ] && echo ok || echo FAILED)"
+  warn "  CoreFoundation link: $([ -x "$tmp/cf" ] && echo ok || echo FAILED)"
+  if grep -qE 'tapi error|malformed file|unknown architecture' "$tmp/plain.log" "$tmp/cf.log" 2>/dev/null; then
+    warn "  cause: the linker cannot read the SDK's .tbd stubs"
   fi
+  warn "  clang:        $(command -v clang)"
+  warn "  clang dir:    $(clang --version 2>&1 | sed -n 's/^InstalledDir: //p')"
+  warn "  ld:           $(ld -v 2>&1 | sed -n '1p')"
+  warn "  xcode-select: $(xcode-select -p 2>/dev/null)"
+  warn "  sdk:          $(xcrun --show-sdk-path 2>/dev/null)"
+  warn "  macOS:        $(sw_vers -productVersion 2>/dev/null)"
+  warn "  CLT version:  $(pkgutil --pkg-info=com.apple.pkg.CLTools_Executables 2>/dev/null | sed -n 's/^version: //p')"
+
+  case "$(xcode-select -p 2>/dev/null)" in
+    /Applications/Xcode*.app/*)
+      warn "  the SDK belongs to a different install than the compiler; align them:"
+      warn "    sudo xcode-select -switch /Library/Developer/CommandLineTools" ;;
+    *)
+      warn "  install the Command Line Tools that match this macOS:"
+      warn "    softwareupdate --list"
+      warn "    softwareupdate -i 'Command Line Tools for Xcode-<version>'" ;;
+  esac
+  warn "sketchybar helpers and SbarLua cannot build until this is fixed"
   rm -rf "$tmp"
 }
 
