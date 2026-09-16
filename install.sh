@@ -810,7 +810,14 @@ activate_keyboard_layout() {
   rm -rf "$tmp"
 }
 
+configure_key_repeat() {
+  log "Keyboard: repeat held letters instead of showing accent choices"
+  run /usr/bin/defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+  step "Restart open apps for the keyboard preference to take effect."
+}
+
 post_install() {
+  configure_key_repeat
   fix_permissions
   set_default_shell
   install_fish_plugins
