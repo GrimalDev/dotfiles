@@ -816,7 +816,14 @@ configure_key_repeat() {
   step "Restart open apps for the keyboard preference to take effect."
 }
 
+configure_slimhud() {
+  log "SlimHUD: detect direct volume and brightness changes"
+  run /usr/bin/defaults write com.alexpera.SlimHUD shouldContinuouslyCheck -bool true
+  run /usr/bin/defaults write com.alexpera.SlimHUD marginValue -int 1
+}
+
 post_install() {
+  configure_slimhud
   configure_key_repeat
   fix_permissions
   set_default_shell
