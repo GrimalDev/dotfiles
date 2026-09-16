@@ -59,31 +59,39 @@ local function refresh()
 end
 
 wifi:subscribe({ "routine", "forced", "wifi_change", "system_woke" }, refresh)
-local hovered = {}
+-- Track one current target: a missed exit must not leave an older row hovered.
+local hover_target
+local hover_generation = 0
 local function close_popup()
+    hover_target = nil
+    hover_generation = hover_generation + 1
     wifi:set({ popup = { drawing = false } })
 end
 for _, item in ipairs({ wifi, status_row, ssid_row, ip_row, settings_row }) do
     item:subscribe("mouse.entered", function()
-        hovered[item.name] = true
+        hover_generation = hover_generation + 1
+        hover_target = item.name
         if item == wifi then
             refresh()
             wifi:set({ popup = { drawing = true } })
         end
     end)
     item:subscribe("mouse.exited", function()
-        hovered[item.name] = nil
+        -- An old item's exit can arrive after the next item's enter.
+        if hover_target ~= item.name then return end
+        hover_target = nil
+        hover_generation = hover_generation + 1
+        local generation = hover_generation
         sbar.delay(0.2, function()
-            if not next(hovered) then close_popup() end
+            if generation == hover_generation and not hover_target then
+                close_popup()
+            end
         end)
     end)
 end
-wifi:subscribe("mouse.exited.global", function()
-    hovered = {}
-    close_popup()
-end)
+wifi:subscribe("mouse.exited.global", close_popup)
 settings_row:subscribe("mouse.clicked", function()
-    wifi:set({ popup = { drawing = false } })
+    close_popup()
     sbar.exec("/usr/bin/open 'x-apple.systempreferences:com.apple.wifi-settings-extension'")
 end)
 orientation.subscribe(function(horizontal)

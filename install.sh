@@ -368,6 +368,11 @@ install_packages() {
 
   run "$BREW_BIN" update || warn "brew update failed (continuing)"
   run "$BREW_BIN" bundle install --file="$brewfile"
+  # Kept outside Brewfile: Homebrew currently disables SlimHUD for a Gatekeeper failure.
+  # A failed optional install must not abort the remaining dotfiles setup.
+  if ! run "$BREW_BIN" install --cask slimhud; then
+    warn "SlimHUD was not installed. Check 'brew info --cask slimhud' for availability; no Gatekeeper settings were changed."
+  fi
   step "done"
 }
 
