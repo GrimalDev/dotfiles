@@ -364,6 +364,7 @@ install_packages() {
   # Trust only the calendar helper, not every package in its third-party tap.
   if "$BREW_BIN" trust --help >/dev/null 2>&1; then
     run "$BREW_BIN" trust --formula itspriddle/brews/ical-guy || warn "could not trust ical-guy (continuing)"
+    run "$BREW_BIN" trust --formula asmvik/formulae/skhd || warn "could not trust skhd (continuing)"
   fi
 
   run "$BREW_BIN" update || warn "brew update failed (continuing)"
@@ -758,6 +759,9 @@ start_services() {
   [ "$START_SERVICES" = 1 ] || return 0
   log "Services"
   local svc
+  if command -v skhd >/dev/null 2>&1; then
+    run skhd --start-service || warn "could not start skhd; check Accessibility permission"
+  fi
   for svc in sketchybar borders; do
     if "$BREW_BIN" list --formula "$svc" >/dev/null 2>&1; then
       run "$BREW_BIN" services start "$svc" || warn "could not start $svc"
@@ -852,6 +856,7 @@ summary() {
   Manual steps (require GUI / SIP changes, cannot be scripted):
     - AeroSpace      : open it once, enable "Launch at login"
     - Karabiner      : grant Input Monitoring + enable the driver
+    - skhd           : grant Accessibility, then run skhd --restart-service
     - Raycast        : launch and sign in
     - 1Password CLI  : op signin
     - yabai (legacy) : not installed; needs scripting-addon + SIP changes

@@ -54,8 +54,8 @@ PATH = '/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}'
 inner.horizontal = 5
 inner.vertical = 5
 # BEGIN SKETCHYBAR DISPLAY GAPS
-outer.left = 5
-outer.top = [{ monitor."^Built-in Retina Display$" = 5 }, 5]
+outer.left = [{ monitor."^PA32QCV$" = 55 }, { monitor."^PA27JCV$" = 5 }, 5]
+outer.top = [{ monitor."^PA32QCV$" = 5 }, { monitor."^PA27JCV$" = 37 }, 5]
 # END SKETCHYBAR DISPLAY GAPS
 outer.bottom = 5
 outer.right = 5

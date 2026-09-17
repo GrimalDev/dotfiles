@@ -20,6 +20,12 @@ local wifi = sbar.add("item", "wifi", {
     popup = { align = "right", height = 32, y_offset = 4 },
 })
 
+local meeting_gap = sbar.add("item", "wifi.meeting_gap", {
+    position = "right", width = 12,
+    icon = { drawing = false }, label = { drawing = false },
+    background = { drawing = false }, padding_left = 0, padding_right = 0,
+})
+
 local function row(name, title, value)
     return sbar.add("item", name, {
         position = "popup.wifi",
@@ -95,6 +101,15 @@ settings_row:subscribe("mouse.clicked", function()
     sbar.exec("/usr/bin/open 'x-apple.systempreferences:com.apple.wifi-settings-extension'")
 end)
 orientation.subscribe(function(horizontal)
-    wifi:set({ background = { height = horizontal and 24 or 25 } })
+    wifi:set({
+        background = { height = horizontal and 24 or 25 },
+        padding_left = horizontal and 3 or 10,
+        padding_right = horizontal and 3 or 10,
+    })
+    meeting_gap:set({ drawing = not horizontal })
+    -- Right-side items stack upward in a vertical bar.
+    sbar.exec(horizontal
+        and "sketchybar --move wifi after battery"
+        or "sketchybar --move wifi before meeting.time --move wifi.meeting_gap after wifi")
 end)
 refresh()

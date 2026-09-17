@@ -14,6 +14,7 @@
 tap "felixkratz/formulae"   # sketchybar, borders
 tap "joshmedeski/sesh"      # sesh
 tap "nikitabobko/tap"       # aerospace
+tap "asmvik/formulae"      # skhd
 
 # --- shell / prompt / fuzzy navigation --------------------------------------
 # fish/config.fish + fish/fish_plugins + starship.toml
@@ -55,6 +56,7 @@ brew "gh"
 brew "sketchybar"
 brew "itspriddle/brews/ical-guy" # meeting widget
 brew "borders"
+brew "asmvik/formulae/skhd" # browser and editing shortcuts
 brew "lua"
 brew "switchaudio-osx"      # sketchybar/helpers (volume item)
 brew "nowplaying-cli"       # sketchybar/helpers (media item)
@@ -81,7 +83,6 @@ cask "shottr"                          # screenshot / annotation
 # --- legacy window management (replaced by aerospace; commented) ------------
 # Requires: brew tap koekeishiya/formulae
 # brew "yabai"              # yabai/yabairc — also needs scripting-addon + SIP changes
-# brew "skhd"               # skhd/skhdrc   — skhd 0.3.9 is installed on this machine
 
 # --- optional extras referenced by tracked configs but not strictly required -
 # brew "leohenon/tap/ocv"   # tmux.conf + fish use `ocv` / ~/.local/bin/ocv-link-open

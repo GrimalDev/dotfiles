@@ -17,7 +17,9 @@ int main(void) {
      @"builtin":@(CGDisplayIsBuiltin([displayID unsignedIntValue]) != 0),
      @"reserved_top":@(MAX(height, NSMaxY(screen.frame) - NSMaxY(screen.visibleFrame))),
      @"name":screen.localizedName, @"notch_height":@(height), @"notch_width":@(width),
-     @"width":@(screen.frame.size.width)}];
+     @"rotation":@(CGDisplayRotation([displayID unsignedIntValue])),
+     @"index":@([NSScreen.screens indexOfObject:screen] + 1),
+     @"x":@(screen.frame.origin.x), @"height":@(screen.frame.size.height), @"width":@(screen.frame.size.width)}];
   }
   if (!result.count) return 1;
   NSData *json = [NSJSONSerialization dataWithJSONObject:result options:0 error:nil];

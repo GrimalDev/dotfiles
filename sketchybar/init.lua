@@ -1,8 +1,16 @@
 -- Require the sketchybar module
 sbar = require("sketchybar")
 
--- Set the bar name, if you are using another bar instance than sketchybar
--- sbar.set_bar_name("bottom_bar")
+local portrait = os.getenv("SKETCHYBAR_ROLE") == "portrait"
+if portrait then
+  sbar.set_bar_name("sketchybar_portrait")
+  local exec = sbar.exec
+  local binary = (os.getenv("HOME") .. "/.cache/sketchybar/sketchybar_portrait")
+  sbar.exec = function(command, ...)
+    command = command:gsub("^sketchybar ", "'" .. binary .. "' ")
+    return exec(command, ...)
+  end
+end
 
 -- Bundle the entire initial configuration into a single message to sketchybar
 sbar.begin_config()

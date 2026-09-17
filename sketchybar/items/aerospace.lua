@@ -47,6 +47,11 @@ local function is_numbered_workspace(workspace_name)
 	return n ~= nil and n >= 1 and n <= 10 and name:match("^%d+$") ~= nil
 end
 
+sbar.exec("aerospace list-monitors --format '%{monitor-id}|%{monitor-appkit-nsscreen-screens-id}'", function(output)
+  local display_ids = {}
+  for monitor, display in output:gmatch("(%d+)|(%d+)") do
+    display_ids[tonumber(monitor)] = tonumber(display)
+  end
 sbar.exec("aerospace list-workspaces --all --format '%{workspace}%{monitor-id}' --json", function(spaces_json)
 	local spaces = parse_workspace_json(spaces_json)
 
@@ -91,7 +96,7 @@ sbar.exec("aerospace list-workspaces --all --format '%{workspace}%{monitor-id}' 
 							border_width = 0,
 							height = 26,
 						},
-						associated_display = monitor_id,
+						associated_display = display_ids[monitor_id] or monitor_id,
 					})
 
 					local space_bracket = sbar.add("bracket", { space.name }, {
@@ -110,7 +115,7 @@ sbar.exec("aerospace list-workspaces --all --format '%{workspace}%{monitor-id}' 
                         label = { drawing = false },
                         background = { drawing = false },
 						width = settings.aerospace_padding,
-						associated_display = monitor_id,
+						associated_display = display_ids[monitor_id] or monitor_id,
 					})
 
 					space:subscribe("aerospace_workspace_change", function(env)
@@ -146,3 +151,5 @@ sbar.exec("aerospace list-workspaces --all --format '%{workspace}%{monitor-id}' 
 	end)
 end)
 
+
+end)

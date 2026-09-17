@@ -60,8 +60,15 @@ local meeting_card = sbar.add("bracket", "meeting.card", {
 	padding_right = 3,
 })
 
+local function has_notch()
+    for _, display in ipairs(orientation.displays) do
+        if display.notch_height > 0 then return true end
+    end
+    return false
+end
+
 local function center_meeting()
-    if not orientation.horizontal then return end
+    if not orientation.horizontal or not has_notch() then return end
     sbar.delay(0.05, function()
         if not orientation.horizontal then return end
         local screen
@@ -74,10 +81,12 @@ local function center_meeting()
         end
         if not screen then return end
         local query = meeting_card:query()
-        local bounds = query.bounding_rects and query.bounding_rects["display-1"]
+        local bounds = query.bounding_rects and query.bounding_rects["display-" .. tostring(screen.index or 1)]
         if not bounds then return end
         local notch = screen.notch_width or 0
-        local target = (screen.width + (screen.width + notch) / 2) / 2
+        local target = (screen.x or 0) + (notch > 0
+            and (screen.width + (screen.width + notch) / 2) / 2
+            or screen.width / 2)
         local current = bounds.origin[1] + bounds.size[1] / 2
         local next_width = math.max(0, math.floor(spacer_width + target - current + 0.5))
         if next_width ~= spacer_width then
@@ -89,10 +98,11 @@ end
 
 local function apply_orientation(horizontal)
     spacer_width = 0
-    meeting_spacer:set({ drawing = horizontal, width = 0 })
+    meeting_spacer:set({ drawing = horizontal and has_notch(), width = 0 })
+    local position = horizontal and (has_notch() and "e" or "center") or "right"
     for _, item in ipairs({ meeting_icon, meeting_next, meeting_label, meeting_time }) do
         item:set({
-            position = horizontal and "e" or "right",
+            position = position,
             width = horizontal and "dynamic" or 16,
             padding_left = horizontal and 3 or 0,
             padding_right = horizontal and 3 or 0,

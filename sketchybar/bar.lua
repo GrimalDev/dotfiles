@@ -25,6 +25,7 @@ local config_dir = os.getenv("CONFIG_DIR") or (os.getenv("HOME") .. "/.config/sk
 local command = "/bin/bash " .. quote(config_dir .. "/helpers/display-info.sh")
 local busy = false
 local previous_profile
+local portrait = os.getenv("SKETCHYBAR_ROLE") == "portrait"
 
 local function sync_gaps(displays, profile)
   sbar.exec("aerospace config --config-path", function(path, code)
@@ -34,7 +35,7 @@ local function sync_gaps(displays, profile)
     if not file then return end
     local original = file:read("*a")
     file:close()
-    local updated = layout.replace_gaps(original, layout.gaps(displays, profile))
+    local updated = layout.replace_gaps(original, layout.gaps(displays, settings.bar.height))
     if not updated or updated == original then return end
     -- Stage in the same directory for an atomic replacement.
     local temporary = path .. ".sketchybar.tmp"
@@ -57,8 +58,11 @@ local function refresh()
     busy = false
     -- A failed probe must not revert a working layout or rewrite window gaps.
     if code ~= 0 or type(displays) ~= "table" or #displays == 0 then return end
-    local profile = layout.profile(displays, settings.bar.height)
-    local signature = profile.position .. ':' .. profile.height .. ':' .. profile.notch_width
+    local selected, indices = layout.select(displays, portrait)
+    local profile = layout.profile(selected, settings.bar.height)
+    profile.display = indices ~= "" and indices or "main"
+    profile.hidden = #selected == 0
+    local signature = profile.position .. ':' .. profile.height .. ':' .. profile.notch_width .. ':' .. indices
     if signature ~= previous_profile then
       profile.padding_left = profile.position == "top" and 10 or settings.paddings
       -- Leave room for macOS privacy/recording indicators at the screen edge.
@@ -66,8 +70,12 @@ local function refresh()
       sbar.bar(profile)
       previous_profile = signature
     end
-    orientation.set(profile.position == "top" or profile.position == "bottom", displays)
-    sync_gaps(displays, profile)
+    orientation.set(profile.position == "top" or profile.position == "bottom", selected)
+    if not portrait then
+      sync_gaps(displays, profile)
+      local rotated = layout.select(displays, true)
+      sbar.exec("/bin/bash " .. quote(config_dir .. "/helpers/portrait-bar.sh") .. (#rotated > 0 and " start" or " stop"))
+    end
   end)
 end
 
@@ -79,3 +87,9 @@ local watcher = sbar.add("item", "display.layout", {
 })
 watcher:subscribe({ "routine", "forced", "display_change", "system_woke" }, refresh)
 refresh()
+
+if not portrait then
+  watcher:subscribe("aerospace_workspace_change", function()
+    sbar.exec("/bin/bash " .. quote(config_dir .. "/helpers/portrait-bar.sh") .. " trigger")
+  end)
+end
