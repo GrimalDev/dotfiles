@@ -55,6 +55,10 @@ ctrl - w [
   "kitty" ~
   * : skhd -k 'ctrl + alt - backspace'
 ]
+alt - left : skhd -k 'cmd - left'
+alt - right : skhd -k 'cmd - right'
+shift + alt - left : skhd -k 'shift + cmd - left'
+shift + alt - right : skhd -k 'shift + cmd - right'
 
 # System control
 
