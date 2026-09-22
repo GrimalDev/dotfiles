@@ -5,6 +5,7 @@ local orientation = require("helpers.bar-orientation")
 
 sbar.bar({
   sticky = true,
+  hidden = true, -- Do not draw on a fallback screen before the first probe.
   position = "left",
   height = settings.bar.height,
   margin = 0,
@@ -24,6 +25,7 @@ end
 local config_dir = os.getenv("CONFIG_DIR") or (os.getenv("HOME") .. "/.config/sketchybar")
 local command = "/bin/bash " .. quote(config_dir .. "/helpers/display-info.sh")
 local busy = false
+local refresh_pending = false
 local previous_profile
 local portrait = os.getenv("SKETCHYBAR_ROLE") == "portrait"
 
@@ -51,14 +53,25 @@ local function sync_gaps(displays, profile)
   end)
 end
 
-local function refresh()
-  if busy then return end
+local refresh
+refresh = function()
+  if busy then refresh_pending = true; return end
   busy = true
   sbar.exec(command, function(displays, code)
     busy = false
+    if refresh_pending then
+      refresh_pending = false
+      refresh()
+      return -- This result may describe the display that was just removed.
+    end
     -- A failed probe must not revert a working layout or rewrite window gaps.
     if code ~= 0 or type(displays) ~= "table" or #displays == 0 then return end
     local selected, indices = layout.select(displays, portrait)
+    if portrait and #selected == 0 then
+      sbar.bar({ hidden = true })
+      sbar.exec("sketchybar --quit")
+      return
+    end
     local profile = layout.profile(selected, settings.bar.height)
     profile.display = indices ~= "" and indices or "main"
     profile.hidden = #selected == 0
@@ -83,9 +96,15 @@ end
 local watcher = sbar.add("item", "display.layout", {
   drawing = false,
   updates = true,
-  update_freq = 15,
+  update_freq = 2,
 })
-watcher:subscribe({ "routine", "forced", "display_change", "system_woke" }, refresh)
+watcher:subscribe({ "routine", "forced" }, refresh)
+watcher:subscribe({ "display_change", "system_woke" }, function()
+  -- Display indices can be reassigned on disconnect. Hide stale placement first.
+  sbar.bar({ hidden = true })
+  previous_profile = nil
+  refresh()
+end)
 refresh()
 
 if not portrait then
