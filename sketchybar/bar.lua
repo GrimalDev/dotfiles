@@ -98,13 +98,9 @@ local watcher = sbar.add("item", "display.layout", {
   updates = true,
   update_freq = 2,
 })
-watcher:subscribe({ "routine", "forced" }, refresh)
-watcher:subscribe({ "display_change", "system_woke" }, function()
-  -- Display indices can be reassigned on disconnect. Hide stale placement first.
-  sbar.bar({ hidden = true })
-  previous_profile = nil
-  refresh()
-end)
+-- display_change also fires when AeroSpace focuses another monitor.
+-- Recheck the displays; only a changed profile should redraw the bar.
+watcher:subscribe({ "routine", "forced", "display_change", "system_woke" }, refresh)
 refresh()
 
 if not portrait then
