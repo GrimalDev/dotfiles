@@ -59,6 +59,8 @@ alt - left : skhd -k 'cmd - left'
 alt - right : skhd -k 'cmd - right'
 shift + alt - left : skhd -k 'shift + cmd - left'
 shift + alt - right : skhd -k 'shift + cmd - right'
+shift + cmd - left : skhd -k 'cmd - left'
+shift + cmd - right : skhd -k 'cmd - right'
 
 # System control
 
