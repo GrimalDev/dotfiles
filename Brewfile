@@ -73,6 +73,7 @@ cask "aerospace"
 cask "karabiner-elements"
 cask "raycast"
 cask "hiddenbar"
+cask "monitorcontrol"                  # external display brightness and volume
 cask "1password"                       # desktop app
 cask "1password-cli"                   # op/config
 cask "vivaldi"                         # vivaldi/ custom CSS is tracked in this repo
