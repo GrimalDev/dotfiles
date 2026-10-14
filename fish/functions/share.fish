@@ -1,8 +1,19 @@
 function share
     # Usage:
-    #   share /path/to/file_or_folder [port] [timeout_minutes]
+    #   share /path/to/file_or_folder [port] [timeout_minutes] [open]
     #   share stop
     set -l container_name share_container
+
+    # Accept either a trailing "open" or the --open / -o flag.
+    argparse 'o/open' -- $argv; or return
+    set -l open_browser 0
+    if set -q _flag_open
+        set open_browser 1
+    end
+    if test (count $argv) -ge 2; and test "$argv[-1]" = open
+        set open_browser 1
+        set -e argv[-1]
+    end
 
     # Handle stop
     if test "$argv[1]" = "stop"
@@ -18,7 +29,7 @@ function share
     # Path to serve
     set -l share_path $argv[1]
     if test -z "$share_path"
-        echo "Usage: share /path/to/file_or_folder [port] [timeout_minutes]"
+        echo "Usage: share /path/to/file_or_folder [port] [timeout_minutes] [open]"
         echo "       share stop"
         return 1
     end
@@ -52,7 +63,7 @@ function share
         docker run -d --name $container_name -p $port:80 \
             -v (realpath $share_path):/usr/share/nginx/html:ro \
             -v $nginx_conf:/etc/nginx/conf.d/default.conf:ro \
-            nginx
+            nginx; or return
     else
         # Single file
         set -l dir (mktemp -d)
@@ -73,7 +84,11 @@ function share
         end
 
         echo "Sharing $filename at http://localhost:$port (auto-stop in $timeout_min min)"
-        docker run -d --name $container_name -p $port:80 -v $dir:/usr/share/nginx/html:ro nginx
+        docker run -d --name $container_name -p $port:80 -v $dir:/usr/share/nginx/html:ro nginx; or return
+    end
+
+    if test $open_browser -eq 1
+        open "http://localhost:$port"
     end
 
     # Auto-stop after timeout
