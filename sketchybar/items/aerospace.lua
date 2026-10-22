@@ -1,155 +1,89 @@
 local colors = require("colors")
-local icons = require("icons")
 local settings = require("settings")
-local app_icons = require("helpers.app_icons")
+local spaces = {}
+local busy = false
 
-local item_order = ""
-local spaces_by_name = {}
-
-local function getAppIcon(app_name)
-	return app_icons[app_name] or app_icons["default"]
+local function refresh()
+  if busy then return end
+  busy = true
+  sbar.exec("aerospace list-monitors --format '%{monitor-id}|%{monitor-appkit-nsscreen-screens-id}'", function(output, code)
+    if code ~= 0 or type(output) ~= "string" then busy = false; return end
+    local displays = {}
+    for monitor, display in output:gmatch("(%d+)|(%d+)") do
+      displays[tonumber(monitor)] = tonumber(display)
+    end
+    if next(displays) == nil then busy = false; return end
+    sbar.exec("aerospace list-workspaces --all --format '%{workspace}%{monitor-id}' --json", function(workspaces, status)
+      if status ~= 0 or type(workspaces) ~= "table" or #workspaces == 0 then busy = false; return end
+      sbar.exec("aerospace list-workspaces --monitor all --visible", function(output, status)
+        busy = false
+        if status ~= 0 or type(output) ~= "string" then return end
+        local visible = {}
+        for name in output:gmatch("[^\r\n]+") do visible[name] = true end
+        local present, order = {}, {}
+        table.sort(workspaces, function(a, b) return a.workspace < b.workspace end)
+        for _, workspace in ipairs(workspaces) do
+          local name = workspace.workspace
+          local label = name:match("[^/]+$") or name
+          local number = tonumber(label)
+          local display = displays[workspace["monitor-id"]]
+          if number and number >= 1 and number <= 10 and label:match("^%d+$") and display then
+            present[name] = true
+            local entry = spaces[name]
+            if not entry then
+              local item = sbar.add("item", "space." .. name, {
+                icon = { drawing = false },
+                label = {
+                  drawing = true, string = label,
+                  font = { style = settings.font.style_map["SemiBold"], size = 12.0 },
+                  padding_right = 10, padding_left = 10,
+                },
+                padding_right = 0, padding_left = 0,
+                background = { border_width = 0, height = 26 },
+              })
+              local padding = sbar.add("item", "space.padding." .. name, {
+                icon = { drawing = false }, label = { drawing = false },
+                background = { drawing = false }, width = settings.aerospace_padding,
+              })
+              item:subscribe("mouse.clicked", function()
+                sbar.exec("aerospace workspace '" .. name:gsub("'", "'\\''") .. "'")
+              end)
+              entry = { item = item, padding = padding }
+              spaces[name] = entry
+            end
+            entry.item:set({
+              drawing = true, associated_display = display,
+              label = { color = visible[name] and colors.black or colors.white },
+              background = { color = visible[name] and colors.spaces.active or colors.bg1 },
+            })
+            entry.padding:set({ drawing = true, associated_display = display })
+            table.insert(order, { name = name, number = number })
+          end
+        end
+        for name, entry in pairs(spaces) do
+          if not present[name] then
+            entry.item:set({ drawing = false })
+            entry.padding:set({ drawing = false })
+          end
+        end
+        table.sort(order, function(a, b)
+          if a.number == b.number then return a.name < b.name end
+          return a.number < b.number
+        end)
+        local names = {}
+        for _, entry in ipairs(order) do
+          table.insert(names, spaces[entry.name].item.name)
+          table.insert(names, spaces[entry.name].padding.name)
+        end
+        if #names > 0 then sbar.exec("sketchybar --reorder " .. table.concat(names, " ")) end
+      end)
+    end)
+  end)
 end
 
--- Simple JSON array parser for our specific case
-local function parse_workspace_json(json_str)
-	if not json_str then
-		return {}
-	end
-	if type(json_str) == "table" then
-		return json_str
-	end
-
-	local spaces = {}
-	-- Remove brackets and split by commas
-	local items = json_str:gsub("^%[", ""):gsub("%]$", ""):gsub("%s+", "")
-	for item in items:gmatch("{[^}]+}") do
-		local workspace = item:match('"workspace"%s*:%s*"([^"]+)"')
-		local monitor_id = item:match('"monitor%-id"%s*:%s*(%d+)')
-		if workspace and monitor_id then
-			table.insert(spaces, {
-				workspace = workspace,
-				["monitor-id"] = tonumber(monitor_id),
-			})
-		end
-	end
-	return spaces
-end
-
-local function get_workspace_icon(workspace_name)
-	-- Extract just the workspace name without any prefix
-	local name = workspace_name:match("[^/]+$") or workspace_name
-	return workspace_icons[name] or "󰆮"
-end
-
-local function is_numbered_workspace(workspace_name)
-	local name = workspace_name:match("[^/]+$") or workspace_name
-	local n = tonumber(name)
-	return n ~= nil and n >= 1 and n <= 10 and name:match("^%d+$") ~= nil
-end
-
-sbar.exec("aerospace list-monitors --format '%{monitor-id}|%{monitor-appkit-nsscreen-screens-id}'", function(output)
-  local display_ids = {}
-  for monitor, display in output:gmatch("(%d+)|(%d+)") do
-    display_ids[tonumber(monitor)] = tonumber(display)
-  end
-sbar.exec("aerospace list-workspaces --all --format '%{workspace}%{monitor-id}' --json", function(spaces_json)
-	local spaces = parse_workspace_json(spaces_json)
-
-	-- Get all visible workspaces
-	sbar.exec("aerospace list-workspaces --monitor all --visible", function(visible_workspaces)
-		-- Create a set of visible workspaces for quick lookup
-		local visible_set = {}
-		for workspace in visible_workspaces:gmatch("[^\r\n]+") do
-			visible_set[workspace] = true
-		end
-
-		-- Group spaces by monitor
-		local monitors = {}
-		for _, space_info in ipairs(spaces) do
-			local monitor_id = space_info["monitor-id"]
-			monitors[monitor_id] = monitors[monitor_id] or {}
-			table.insert(monitors[monitor_id], space_info.workspace)
-		end
-
-		for monitor_id, monitor_spaces in pairs(monitors) do
-			for _, space_name in ipairs(monitor_spaces) do
-				if is_numbered_workspace(space_name) then
-					local space = sbar.add("item", "space." .. space_name, {
-						icon = {
-							drawing = false,
-						},
-						label = {
-							drawing = true,
-							string = space_name:match("[^/]+$") or space_name,
-							color = visible_set[space_name] and colors.black or colors.white,
-							font = {
-								style = settings.font.style_map["SemiBold"],
-								size = 12.0,
-							},
-							padding_right = 10,
-							padding_left = 10,
-						},
-						padding_right = 0,
-						padding_left = 0,
-						background = {
-							color = visible_set[space_name] and colors.spaces.active or colors.bg1,
-							border_width = 0,
-							height = 26,
-						},
-						associated_display = display_ids[monitor_id] or monitor_id,
-					})
-
-					local space_bracket = sbar.add("bracket", { space.name }, {
-						background = {
-							color = colors.transparent,
-							border_color = colors.bg2,
-							height = 28,
-							border_width = 0,
-						},
-					})
-
-					-- Padding space
-					local space_padding = sbar.add("item", "space.padding." .. space_name, {
-						script = "",
-                        icon = { drawing = false },
-                        label = { drawing = false },
-                        background = { drawing = false },
-						width = settings.aerospace_padding,
-						associated_display = display_ids[monitor_id] or monitor_id,
-					})
-
-					space:subscribe("aerospace_workspace_change", function(env)
-						-- Get current visible workspaces after change
-						sbar.exec("aerospace list-workspaces --monitor all --visible", function(visible_workspaces)
-							local visible_set = {}
-							for workspace in visible_workspaces:gmatch("[^\r\n]+") do
-								visible_set[workspace] = true
-							end
-
-							space:set({
-								icon = { color = colors.white },
-								label = {
-									drawing = true,
-									color = visible_set[space_name] and colors.black or colors.white,
-								},
-								background = { color = visible_set[space_name] and colors.spaces.active or colors.bg1 },
-							})
-						end)
-					end)
-
-					space:subscribe("mouse.clicked", function()
-						sbar.exec("aerospace workspace " .. space_name)
-					end)
-
-					item_order = item_order .. " " .. space.name .. " " .. space_padding.name
-				end
-			end
-		end
-		if item_order ~= "" then
-			sbar.exec("sketchybar --reorder " .. item_order)
-		end
-	end)
-end)
-
-
-end)
+-- Retry after startup failures, and refresh assignments after monitor changes.
+local watcher = sbar.add("item", "aerospace.refresh", {
+  drawing = false, updates = true, update_freq = 5,
+})
+watcher:subscribe({ "routine", "forced", "aerospace_workspace_change", "display_change", "system_woke" }, refresh)
+refresh()
