@@ -81,8 +81,7 @@ function sudo
     if test "$argv" = !!
         eval command sudo -E $history[1]
     else
-        set -x TERMINFO "$TERMINFO"
-        command sudo -E $argv
+        command sudo -E TERMINFO=/Applications/kitty.app/Contents/Resources/kitty/terminfo $argv
     end
 end
 
